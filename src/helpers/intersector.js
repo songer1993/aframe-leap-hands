@@ -11,6 +11,7 @@ Intersector.prototype.update = function (options, object3D, hand, isHolding) {
   // Update options.
   this.holdDistance = options.holdDistance;
   this.debug = options.debug;
+  this.showLine = options.showLine;
 
   // Update raycaster.
   this.raycaster.far = this.holdDistance;
@@ -23,7 +24,7 @@ Intersector.prototype.update = function (options, object3D, hand, isHolding) {
   object3D.localToWorld(this.raycaster.ray.origin);
 
   // Update arrow helper.
-  if (this.debug) {
+  if (this.debug || this.showLine) {
     this.arrowHelper = this.arrowHelper || this.createArrowHelper();
     this.arrowHelper.position.copy(this.raycaster.ray.origin);
     object3D.worldToLocal(this.arrowHelper.position);

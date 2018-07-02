@@ -8,7 +8,7 @@ var nextID = 1;
 /**
  * A-Frame component for a single Leap Motion hand.
  */
-module.exports = {
+module.exports = AFRAME.registerComponent('leap-hand', {
   schema: {
     hand:               {default: '', oneOf: ['left', 'right'], required: true},
     enablePhysics:      {default: false},
@@ -17,6 +17,7 @@ module.exports = {
     holdSelector:       {default: '[holdable]'},
     holdSensitivity:    {default: 0.95}, // [0,1]
     releaseSensitivity: {default: 0.75}, // [0,1]
+    showLine:           {default: true},
     debug:              {default: false}
   },
 
@@ -145,7 +146,7 @@ module.exports = {
       body: this.handBody ? this.handBody.palmBody : null
     };
   }
-};
+});
 
 function circularArrayAvg (array) {
   var avg = 0;
