@@ -1,41 +1,41 @@
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
-
+/******/
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-
+/******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
 /******/ 			l: false,
 /******/ 			exports: {}
 /******/ 		};
-
+/******/
 /******/ 		// Execute the module function
 /******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-
+/******/
 /******/ 		// Flag the module as loaded
 /******/ 		module.l = true;
-
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-
-
+/******/
+/******/
 /******/ 	// expose the modules object (__webpack_modules__)
 /******/ 	__webpack_require__.m = modules;
-
+/******/
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
-
+/******/
 /******/ 	// identity function for calling harmony imports with the correct context
 /******/ 	__webpack_require__.i = function(value) { return value; };
-
+/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -46,7 +46,7 @@
 /******/ 			});
 /******/ 		}
 /******/ 	};
-
+/******/
 /******/ 	// getDefaultExport function for compatibility with non-harmony modules
 /******/ 	__webpack_require__.n = function(module) {
 /******/ 		var getter = module && module.__esModule ?
@@ -55,15 +55,15 @@
 /******/ 		__webpack_require__.d(getter, 'a', getter);
 /******/ 		return getter;
 /******/ 	};
-
+/******/
 /******/ 	// Object.prototype.hasOwnProperty.call
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-
+/******/
 /******/ 	// __webpack_public_path__
 /******/ 	__webpack_require__.p = "";
-
+/******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 34);
+/******/ 	return __webpack_require__(__webpack_require__.s = 17);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -8257,7 +8257,7 @@ Dialog.warnBones = function(){
  * @namespace Leap
  */
 module.exports = {
-  Controller: __webpack_require__(22),
+  Controller: __webpack_require__(23),
   Frame: __webpack_require__(6),
   Gesture: __webpack_require__(7),
   Hand: __webpack_require__(5),
@@ -8265,13 +8265,13 @@ module.exports = {
   Finger: __webpack_require__(4),
   InteractionBox: __webpack_require__(13),
   CircularBuffer: __webpack_require__(9),
-  UI: __webpack_require__(24),
+  UI: __webpack_require__(25),
   JSONProtocol: __webpack_require__(14).JSONProtocol,
   glMatrix: __webpack_require__(1),
   mat3: __webpack_require__(1).mat3,
   vec3: __webpack_require__(1).vec3,
   loopController: undefined,
-  version: __webpack_require__(27),
+  version: __webpack_require__(28),
 
   /**
    * Expose utility libraries for convenience
@@ -8739,6 +8739,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -8756,8 +8760,8 @@ process.umask = function() { return 0; };
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = {
-  'system': __webpack_require__(33),
-  'leap-hand': __webpack_require__(32),
+  'system': __webpack_require__(34),
+  'leap-hand': __webpack_require__(33),
   registerAll: function () {
     AFRAME.registerSystem('leap', this.system);
     AFRAME.registerComponent('leap-hand', this['leap-hand']);
@@ -8767,6 +8771,13 @@ module.exports = {
 
 /***/ }),
 /* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(16).registerAll();
+
+
+/***/ }),
+/* 18 */
 /***/ (function(module, exports) {
 
   var DEFAULTS = {
@@ -9040,7 +9051,7 @@ module.exports = {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Leap = __webpack_require__(12);
@@ -9186,7 +9197,7 @@ module.exports = function(scope) {
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 /**
@@ -9211,7 +9222,7 @@ module.exports = CircularArray;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var BaseConnection = module.exports = __webpack_require__(10)
@@ -9315,10 +9326,10 @@ BrowserConnection.prototype.stopFocusLoop = function() {
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var WebSocket = __webpack_require__(29)
+var WebSocket = __webpack_require__(30)
   , BaseConnection = __webpack_require__(10)
   , _ = __webpack_require__(0);
 
@@ -9344,7 +9355,7 @@ NodeConnection.prototype.setupSocket = function() {
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(process) {var Frame = __webpack_require__(6)
@@ -9352,7 +9363,7 @@ NodeConnection.prototype.setupSocket = function() {
   , Pointable = __webpack_require__(2)
   , Finger = __webpack_require__(4)
   , CircularBuffer = __webpack_require__(9)
-  , Pipeline = __webpack_require__(23)
+  , Pipeline = __webpack_require__(24)
   , EventEmitter = __webpack_require__(3).EventEmitter
   , gestureListener = __webpack_require__(7).gestureListener
   , Dialog = __webpack_require__(11)
@@ -9440,7 +9451,7 @@ var Controller = module.exports = function(opts) {
   this.accumulatedGestures = [];
   this.checkVersion = opts.checkVersion;
   if (opts.connectionType === undefined) {
-    this.connectionType = (this.inBrowser() ? __webpack_require__(20) : __webpack_require__(21));
+    this.connectionType = (this.inBrowser() ? __webpack_require__(21) : __webpack_require__(22));
   } else {
     this.connectionType = opts.connectionType;
   }
@@ -10093,7 +10104,7 @@ _.extend(Controller.prototype, EventEmitter.prototype);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(15)))
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 var Pipeline = module.exports = function (controller) {
@@ -10151,16 +10162,16 @@ Pipeline.prototype.addWrappedStep = function (type, callback) {
 };
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports.UI = {
-  Region: __webpack_require__(26),
-  Cursor: __webpack_require__(25)
+  Region: __webpack_require__(27),
+  Cursor: __webpack_require__(26)
 };
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
 var Cursor = module.exports = function() {
@@ -10175,7 +10186,7 @@ var Cursor = module.exports = function() {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var EventEmitter = __webpack_require__(3).EventEmitter
@@ -10267,7 +10278,7 @@ Region.prototype.mapToXY = function(position, width, height) {
 _.extend(Region.prototype, EventEmitter.prototype)
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 // This file is automatically updated from package.json by grunt.
@@ -10279,7 +10290,7 @@ module.exports = {
 }
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports) {
 
 var g;
@@ -10306,7 +10317,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/// shim for browser packaging
@@ -10315,10 +10326,10 @@ module.exports = function() {
   return global.WebSocket || global.MozWebSocket;
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(28)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(29)))
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports) {
 
 /**
@@ -10424,7 +10435,7 @@ module.exports = HandBody;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports) {
 
 /**
@@ -10498,13 +10509,13 @@ module.exports = Intersector;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var HandMesh = __webpack_require__(17),
-    CircularArray = __webpack_require__(19),
-    Intersector = __webpack_require__(31),
-    HandBody = __webpack_require__(30);
+var HandMesh = __webpack_require__(18),
+    CircularArray = __webpack_require__(20),
+    Intersector = __webpack_require__(32),
+    HandBody = __webpack_require__(31);
 
 var nextID = 1;
 
@@ -10661,11 +10672,11 @@ function circularArrayAvg (array) {
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Leap = __webpack_require__(12),
-    transform = __webpack_require__(18);
+    transform = __webpack_require__(19);
 
 // Defaults from leap.transform.js.
 var DEFAULT_SCALE = 0.001;
@@ -10709,13 +10720,6 @@ module.exports = {
     return this.controller.frame();
   }
 };
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(16).registerAll();
 
 
 /***/ })
