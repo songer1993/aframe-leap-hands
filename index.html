@@ -7,75 +7,53 @@
 	<title>Examples • Grabbing</title>
 	<!-- <script src="./dist/aframe-leap-hands.min.js"></script> -->
 	<script src="./dist/aframe-leap-hands.js"></script>
-
-	<script>
-		AFRAME.registerPrimitive('a-grid', {
-			defaultComponents: {
-				geometry: {
-					primitive: 'plane',
-					width: 75,
-					height: 75
-				},
-				rotation: {
-					x: -90,
-					y: 0,
-					z: 0
-				},
-				material: {
-					src: 'url(https://cdn.rawgit.com/donmccurdy/aframe-extras/v1.16.3/assets/grid.png)',
-					repeat: '75 75'
-				}
-			},
-			mappings: {
-				width: 'geometry.width',
-				height: 'geometry.height',
-				src: 'material.src'
-			}
-		});
-		AFRAME.registerComponent('holdable', {
-			schema: {
-				activeColor: {
-					default: 'orange'
-				}
-			},
-			dependencies: ['dynamic-body'],
-			init: function () {
-				this.physics = /** @type {AFRAME.System}     */ this.el.sceneEl.systems.physics;
-				this.constraint = /** @type {CANNON.Constraint} */ null;
-				this.handID = /** @type {number} */ null;
-				this.el.addEventListener('handhold', this.onHoldStart.bind(this));
-				this.el.addEventListener('handrelease', this.onHoldStop.bind(this));
-			},
-			onHoldStart: function (e) {
-				if (this.handID) return;
-				this.originalColor = this.el.getAttribute('material').color;
-				this.el.setAttribute('material', 'color', this.data.activeColor);
-				this.constraint = new CANNON.LockConstraint(this.el.body, e.detail.body);
-				this.physics.driver.world.addConstraint(this.constraint);
-				this.handID = e.detail.handID;
-			},
-			onHoldStop: function (e) {
-				if (e.detail.handID !== this.handID) return;
-				this.el.setAttribute('material', 'color', this.originalColor);
-				this.physics.driver.world.removeConstraint(this.constraint);
-				this.constraint = null;
-				this.handID = null;
-			}
-		});
-	</script>
+	<script src="./playground.js"></script>
 </head>
 
 <body>
 	<a-scene>
-		<!-- Player -->
-		<a-entity camera="near: 0.01" fov=110 position="0 0.3 0" look-controls wasd-controls>
-			<a-entity leap-hand="hand: left; enablePhysics: true; objects: [geometry]; holdDistance: 0.5; releaseSensitivity: 0.8; debug: false"></a-entity>
-			<a-entity leap-hand="hand: right; enablePhysics: true; objects: [geometry]; holdDistance: 0.5; releaseSensitivity: 0.8; debug: false"></a-entity>
+		<a-assets>
+			<a-mixin id="hand-cursor" cursor raycaster="showLine:true" position="0 0 0" geometry="primitive: ring;radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
+			  material="color: black; shader: flat; opacity: 0.5" animation="startEvents: click; easing: easeInQuad; property: scale;
+																from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500" super-hands="colliderEvent:raycaster-intersection;
+																colliderEventProperty:els;
+																colliderEndEvent:raycaster-intersection-cleared;
+																colliderEndEventProperty:clearedEls; grabStartButtons: handpinch;
+																grabEndButtons: handrelease;
+																stretchStartButtons: handpinch;
+																stretchEndButtons: handrelease;
+																dragDropStartButtons: handpinch;
+																dragDropEndButtons: handrelease" static-body="shape: sphere; sphereRadius: 0.02">
+			</a-mixin>
+			<a-mixin id="interactable" hoverable grabbable stretchable draggable dropppable></a-mixin>
+
+			<a-mixin id="log-plane" geometry="width: 5; height: 10" material="color: #111; opacity: 0.5" text="color: lightgreen" clickable></a-mixin>
+			<!-- <a-mixin id="avatar-head" geometry="primitive: box; depth: 0.3; height: 0.3; width: 0.3" material="color: #222"></a-mixin> -->
+			<!-- <a-mixin id="my-firebase" firebase="apiKey: abc; authDomain: mysite.firebaseapp.com; databaseURL: https://mysite.firebaseio.com; storageBucket: mysite.appspot.com"></a-mixin> -->
+
+		</a-assets>
+
+		<!-- camera rig -->
+		<a-entity id="#cameraRig" position="0 0.3 0">
+			<!-- camera setting -->
+			<a-camera near=0.01 fov=110 position="0 0 0">
+				<!-- gaze controls -->
+				<!-- <a-entity class="gazecaster"></a-entity> -->
+
+				<!-- leap hands -->
+				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: true; objects: [mixin=interactable]; cursorMixin: hand-cursor; cursorDistance: 0.05"></a-entity>
+				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: true; objects: [mixin=interactable]; cursorMixin: hand-cursor; cursorDistance: 0.05"></a-entity>
+				<!-- <a-entity leap-hand="hand: right; enablePhysics: true; holdDistance: 1; holdDebounce: 100; showLine: true; debug: false; " mixin="super-leap-hand"></a-entity> -->
+			</a-camera>
+
+			<!-- <a-entity class="right-controller"></a-entity>
+			<a-entity class="left-controller"></a-entity> -->
 		</a-entity>
 
-		<a-box id="box1" width="0.25" height="0.25" depth="0.25" position="-0.125 0.13 -0.5" color="red" holdable dynamic-body="shape: box"></a-box>
-		<a-box id="box2" width="0.25" height="0.25" depth="0.25" position="0.00 0.4 -0.5" color="green" holdable dynamic-body="shape: box"></a-box>
-		<a-box id="box3" width="0.25" height="0.25" depth="0.25" position="0.125 0.13 -0.5" color="blue" holdable dynamic-body="shape: box"></a-box>
+
+		<a-box id="box1" width="0.25" height="0.25" depth="0.25" position="-0.125 0.01 -0.5" color="red" dynamic-body mixin="interactable"></a-box>
+		<a-box id="box2" width="0.25" height="0.25" depth="0.25" position="0.00 0.4 -0.5" color="green" dynamic-body mixin="interactable"></a-box>
+		<a-box id="box3" width="0.25" height="0.25" depth="0.25" position="0.125 0.01 -0.5" color="blue" dynamic-body mixin="interactable"></a-box>
 
 		<!-- Terrain -->
 		<a-grid static-body></a-grid>
@@ -88,6 +66,16 @@
 	<script>
 		var box1 = document.querySelector('#box1');
 		var box2 = document.querySelector('#box2');
+		var box3 = document.querySelector('#box3');
+
+		var rightHand = document.querySelector("#right-hand");
+		var leftHand = document.querySelector("#left-hand");
+		// rightHand.setAttribute('super-hands',
+		// 	"colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: handopen; stretchStartButtons: handpinch; stretchEndButtons: handopen; dragDropStartButtons: handpinch; dragDropEndButtons: handopen"
+		// )
+		// leftHand.setAttribute('super-hands',
+		// 	"colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: handopen; stretchStartButtons: handpinch; stretchEndButtons: handopen; dragDropStartButtons: handpinch; dragDropEndButtons: handopen"
+		// )
 	</script>
 </body>
 

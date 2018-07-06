@@ -35,6 +35,12 @@ acorn@^5.0.0, acorn@^5.2.1, acorn@^5.7.1:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.7.1.tgz#f095829297706a7c9776958c0afc8930a9b9d9d8"
 
+aframe-animation-component@~5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/aframe-animation-component/-/aframe-animation-component-5.0.0.tgz#4320643d4f552faf2e208a889c76a01d38b4da22"
+  dependencies:
+    animejs "2.2.0"
+
 aframe-physics-system@~3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/aframe-physics-system/-/aframe-physics-system-3.1.2.tgz#cb10f39b0d564637e729bb24e0f802ad16afcb1b"
@@ -75,6 +81,10 @@ amdefine@>=0.0.4:
 an-array@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/an-array/-/an-array-1.0.0.tgz#c125a5bb8257778e35f4b4f6aa9c7d0fa9e42665"
+
+animejs@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/animejs/-/animejs-2.2.0.tgz#35eefdfc535b81949c9cb06f0b3e60c02e6fdc80"
 
 ansi-regex@^0.2.0, ansi-regex@^0.2.1:
   version "0.2.1"

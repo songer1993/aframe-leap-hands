@@ -98,7 +98,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 
   // Override the current require with this new one
   return newRequire;
-})({28:[function(require,module,exports) {
+})({31:[function(require,module,exports) {
 
 // shim for using process in browser
 var process = module.exports = {};
@@ -285,7 +285,7 @@ process.chdir = function (dir) {
 process.umask = function () {
     return 0;
 };
-},{}],87:[function(require,module,exports) {
+},{}],91:[function(require,module,exports) {
 'use strict'
 
 exports.byteLength = byteLength
@@ -438,7 +438,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],88:[function(require,module,exports) {
+},{}],90:[function(require,module,exports) {
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -531,7 +531,7 @@ module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],29:[function(require,module,exports) {
+},{}],30:[function(require,module,exports) {
 
 var global = arguments[3];
 /*!
@@ -2324,7 +2324,7 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":87,"ieee754":88,"isarray":89,"buffer":29}],3:[function(require,module,exports) {
+},{"base64-js":91,"ieee754":90,"isarray":89,"buffer":30}],4:[function(require,module,exports) {
 var define;
 var global = arguments[3];
 var process = require("process");
@@ -76196,7 +76196,648 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 		}, { "./util.js": 181 }] }, {}, [148])(148);
 });
 //# sourceMappingURL=aframe-master.js.map
-},{"process":28,"buffer":29}],35:[function(require,module,exports) {
+},{"process":31,"buffer":30}],28:[function(require,module,exports) {
+var global = arguments[3];
+var define;
+/*
+ 2017 Julian Garnier
+ Released under the MIT license
+*/
+var $jscomp={scope:{}};$jscomp.defineProperty="function"==typeof Object.defineProperties?Object.defineProperty:function(e,r,p){if(p.get||p.set)throw new TypeError("ES3 does not support getters and setters.");e!=Array.prototype&&e!=Object.prototype&&(e[r]=p.value)};$jscomp.getGlobal=function(e){return"undefined"!=typeof window&&window===e?e:"undefined"!=typeof global&&null!=global?global:e};$jscomp.global=$jscomp.getGlobal(this);$jscomp.SYMBOL_PREFIX="jscomp_symbol_";
+$jscomp.initSymbol=function(){$jscomp.initSymbol=function(){};$jscomp.global.Symbol||($jscomp.global.Symbol=$jscomp.Symbol)};$jscomp.symbolCounter_=0;$jscomp.Symbol=function(e){return $jscomp.SYMBOL_PREFIX+(e||"")+$jscomp.symbolCounter_++};
+$jscomp.initSymbolIterator=function(){$jscomp.initSymbol();var e=$jscomp.global.Symbol.iterator;e||(e=$jscomp.global.Symbol.iterator=$jscomp.global.Symbol("iterator"));"function"!=typeof Array.prototype[e]&&$jscomp.defineProperty(Array.prototype,e,{configurable:!0,writable:!0,value:function(){return $jscomp.arrayIterator(this)}});$jscomp.initSymbolIterator=function(){}};$jscomp.arrayIterator=function(e){var r=0;return $jscomp.iteratorPrototype(function(){return r<e.length?{done:!1,value:e[r++]}:{done:!0}})};
+$jscomp.iteratorPrototype=function(e){$jscomp.initSymbolIterator();e={next:e};e[$jscomp.global.Symbol.iterator]=function(){return this};return e};$jscomp.array=$jscomp.array||{};$jscomp.iteratorFromArray=function(e,r){$jscomp.initSymbolIterator();e instanceof String&&(e+="");var p=0,m={next:function(){if(p<e.length){var u=p++;return{value:r(u,e[u]),done:!1}}m.next=function(){return{done:!0,value:void 0}};return m.next()}};m[Symbol.iterator]=function(){return m};return m};
+$jscomp.polyfill=function(e,r,p,m){if(r){p=$jscomp.global;e=e.split(".");for(m=0;m<e.length-1;m++){var u=e[m];u in p||(p[u]={});p=p[u]}e=e[e.length-1];m=p[e];r=r(m);r!=m&&null!=r&&$jscomp.defineProperty(p,e,{configurable:!0,writable:!0,value:r})}};$jscomp.polyfill("Array.prototype.keys",function(e){return e?e:function(){return $jscomp.iteratorFromArray(this,function(e){return e})}},"es6-impl","es3");var $jscomp$this=this;
+(function(e,r){"function"===typeof define&&define.amd?define([],r):"object"===typeof module&&module.exports?module.exports=r():e.anime=r()})(this,function(){function e(a){if(!h.col(a))try{return document.querySelectorAll(a)}catch(c){}}function r(a,c){for(var d=a.length,b=2<=arguments.length?arguments[1]:void 0,f=[],n=0;n<d;n++)if(n in a){var k=a[n];c.call(b,k,n,a)&&f.push(k)}return f}function p(a){return a.reduce(function(a,d){return a.concat(h.arr(d)?p(d):d)},[])}function m(a){if(h.arr(a))return a;
+h.str(a)&&(a=e(a)||a);return a instanceof NodeList||a instanceof HTMLCollection?[].slice.call(a):[a]}function u(a,c){return a.some(function(a){return a===c})}function C(a){var c={},d;for(d in a)c[d]=a[d];return c}function D(a,c){var d=C(a),b;for(b in a)d[b]=c.hasOwnProperty(b)?c[b]:a[b];return d}function z(a,c){var d=C(a),b;for(b in c)d[b]=h.und(a[b])?c[b]:a[b];return d}function T(a){a=a.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i,function(a,c,d,k){return c+c+d+d+k+k});var c=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(a);
+a=parseInt(c[1],16);var d=parseInt(c[2],16),c=parseInt(c[3],16);return"rgba("+a+","+d+","+c+",1)"}function U(a){function c(a,c,b){0>b&&(b+=1);1<b&&--b;return b<1/6?a+6*(c-a)*b:.5>b?c:b<2/3?a+(c-a)*(2/3-b)*6:a}var d=/hsl\((\d+),\s*([\d.]+)%,\s*([\d.]+)%\)/g.exec(a)||/hsla\((\d+),\s*([\d.]+)%,\s*([\d.]+)%,\s*([\d.]+)\)/g.exec(a);a=parseInt(d[1])/360;var b=parseInt(d[2])/100,f=parseInt(d[3])/100,d=d[4]||1;if(0==b)f=b=a=f;else{var n=.5>f?f*(1+b):f+b-f*b,k=2*f-n,f=c(k,n,a+1/3),b=c(k,n,a);a=c(k,n,a-1/3)}return"rgba("+
+255*f+","+255*b+","+255*a+","+d+")"}function y(a){if(a=/([\+\-]?[0-9#\.]+)(%|px|pt|em|rem|in|cm|mm|ex|ch|pc|vw|vh|vmin|vmax|deg|rad|turn)?$/.exec(a))return a[2]}function V(a){if(-1<a.indexOf("translate")||"perspective"===a)return"px";if(-1<a.indexOf("rotate")||-1<a.indexOf("skew"))return"deg"}function I(a,c){return h.fnc(a)?a(c.target,c.id,c.total):a}function E(a,c){if(c in a.style)return getComputedStyle(a).getPropertyValue(c.replace(/([a-z])([A-Z])/g,"$1-$2").toLowerCase())||"0"}function J(a,c){if(h.dom(a)&&
+u(W,c))return"transform";if(h.dom(a)&&(a.getAttribute(c)||h.svg(a)&&a[c]))return"attribute";if(h.dom(a)&&"transform"!==c&&E(a,c))return"css";if(null!=a[c])return"object"}function X(a,c){var d=V(c),d=-1<c.indexOf("scale")?1:0+d;a=a.style.transform;if(!a)return d;for(var b=[],f=[],n=[],k=/(\w+)\((.+?)\)/g;b=k.exec(a);)f.push(b[1]),n.push(b[2]);a=r(n,function(a,b){return f[b]===c});return a.length?a[0]:d}function K(a,c){switch(J(a,c)){case "transform":return X(a,c);case "css":return E(a,c);case "attribute":return a.getAttribute(c)}return a[c]||
+0}function L(a,c){var d=/^(\*=|\+=|-=)/.exec(a);if(!d)return a;var b=y(a)||0;c=parseFloat(c);a=parseFloat(a.replace(d[0],""));switch(d[0][0]){case "+":return c+a+b;case "-":return c-a+b;case "*":return c*a+b}}function F(a,c){return Math.sqrt(Math.pow(c.x-a.x,2)+Math.pow(c.y-a.y,2))}function M(a){a=a.points;for(var c=0,d,b=0;b<a.numberOfItems;b++){var f=a.getItem(b);0<b&&(c+=F(d,f));d=f}return c}function N(a){if(a.getTotalLength)return a.getTotalLength();switch(a.tagName.toLowerCase()){case "circle":return 2*
+Math.PI*a.getAttribute("r");case "rect":return 2*a.getAttribute("width")+2*a.getAttribute("height");case "line":return F({x:a.getAttribute("x1"),y:a.getAttribute("y1")},{x:a.getAttribute("x2"),y:a.getAttribute("y2")});case "polyline":return M(a);case "polygon":var c=a.points;return M(a)+F(c.getItem(c.numberOfItems-1),c.getItem(0))}}function Y(a,c){function d(b){b=void 0===b?0:b;return a.el.getPointAtLength(1<=c+b?c+b:0)}var b=d(),f=d(-1),n=d(1);switch(a.property){case "x":return b.x;case "y":return b.y;
+case "angle":return 180*Math.atan2(n.y-f.y,n.x-f.x)/Math.PI}}function O(a,c){var d=/-?\d*\.?\d+/g,b;b=h.pth(a)?a.totalLength:a;if(h.col(b))if(h.rgb(b)){var f=/rgb\((\d+,\s*[\d]+,\s*[\d]+)\)/g.exec(b);b=f?"rgba("+f[1]+",1)":b}else b=h.hex(b)?T(b):h.hsl(b)?U(b):void 0;else f=(f=y(b))?b.substr(0,b.length-f.length):b,b=c&&!/\s/g.test(b)?f+c:f;b+="";return{original:b,numbers:b.match(d)?b.match(d).map(Number):[0],strings:h.str(a)||c?b.split(d):[]}}function P(a){a=a?p(h.arr(a)?a.map(m):m(a)):[];return r(a,
+function(a,d,b){return b.indexOf(a)===d})}function Z(a){var c=P(a);return c.map(function(a,b){return{target:a,id:b,total:c.length}})}function aa(a,c){var d=C(c);if(h.arr(a)){var b=a.length;2!==b||h.obj(a[0])?h.fnc(c.duration)||(d.duration=c.duration/b):a={value:a}}return m(a).map(function(a,b){b=b?0:c.delay;a=h.obj(a)&&!h.pth(a)?a:{value:a};h.und(a.delay)&&(a.delay=b);return a}).map(function(a){return z(a,d)})}function ba(a,c){var d={},b;for(b in a){var f=I(a[b],c);h.arr(f)&&(f=f.map(function(a){return I(a,
+c)}),1===f.length&&(f=f[0]));d[b]=f}d.duration=parseFloat(d.duration);d.delay=parseFloat(d.delay);return d}function ca(a){return h.arr(a)?A.apply(this,a):Q[a]}function da(a,c){var d;return a.tweens.map(function(b){b=ba(b,c);var f=b.value,e=K(c.target,a.name),k=d?d.to.original:e,k=h.arr(f)?f[0]:k,w=L(h.arr(f)?f[1]:f,k),e=y(w)||y(k)||y(e);b.from=O(k,e);b.to=O(w,e);b.start=d?d.end:a.offset;b.end=b.start+b.delay+b.duration;b.easing=ca(b.easing);b.elasticity=(1E3-Math.min(Math.max(b.elasticity,1),999))/
+1E3;b.isPath=h.pth(f);b.isColor=h.col(b.from.original);b.isColor&&(b.round=1);return d=b})}function ea(a,c){return r(p(a.map(function(a){return c.map(function(b){var c=J(a.target,b.name);if(c){var d=da(b,a);b={type:c,property:b.name,animatable:a,tweens:d,duration:d[d.length-1].end,delay:d[0].delay}}else b=void 0;return b})})),function(a){return!h.und(a)})}function R(a,c,d,b){var f="delay"===a;return c.length?(f?Math.min:Math.max).apply(Math,c.map(function(b){return b[a]})):f?b.delay:d.offset+b.delay+
+b.duration}function fa(a){var c=D(ga,a),d=D(S,a),b=Z(a.targets),f=[],e=z(c,d),k;for(k in a)e.hasOwnProperty(k)||"targets"===k||f.push({name:k,offset:e.offset,tweens:aa(a[k],d)});a=ea(b,f);return z(c,{children:[],animatables:b,animations:a,duration:R("duration",a,c,d),delay:R("delay",a,c,d)})}function q(a){function c(){return window.Promise&&new Promise(function(a){return p=a})}function d(a){return g.reversed?g.duration-a:a}function b(a){for(var b=0,c={},d=g.animations,f=d.length;b<f;){var e=d[b],
+k=e.animatable,h=e.tweens,n=h.length-1,l=h[n];n&&(l=r(h,function(b){return a<b.end})[0]||l);for(var h=Math.min(Math.max(a-l.start-l.delay,0),l.duration)/l.duration,w=isNaN(h)?1:l.easing(h,l.elasticity),h=l.to.strings,p=l.round,n=[],m=void 0,m=l.to.numbers.length,t=0;t<m;t++){var x=void 0,x=l.to.numbers[t],q=l.from.numbers[t],x=l.isPath?Y(l.value,w*x):q+w*(x-q);p&&(l.isColor&&2<t||(x=Math.round(x*p)/p));n.push(x)}if(l=h.length)for(m=h[0],w=0;w<l;w++)p=h[w+1],t=n[w],isNaN(t)||(m=p?m+(t+p):m+(t+" "));
+else m=n[0];ha[e.type](k.target,e.property,m,c,k.id);e.currentValue=m;b++}if(b=Object.keys(c).length)for(d=0;d<b;d++)H||(H=E(document.body,"transform")?"transform":"-webkit-transform"),g.animatables[d].target.style[H]=c[d].join(" ");g.currentTime=a;g.progress=a/g.duration*100}function f(a){if(g[a])g[a](g)}function e(){g.remaining&&!0!==g.remaining&&g.remaining--}function k(a){var k=g.duration,n=g.offset,w=n+g.delay,r=g.currentTime,x=g.reversed,q=d(a);if(g.children.length){var u=g.children,v=u.length;
+if(q>=g.currentTime)for(var G=0;G<v;G++)u[G].seek(q);else for(;v--;)u[v].seek(q)}if(q>=w||!k)g.began||(g.began=!0,f("begin")),f("run");if(q>n&&q<k)b(q);else if(q<=n&&0!==r&&(b(0),x&&e()),q>=k&&r!==k||!k)b(k),x||e();f("update");a>=k&&(g.remaining?(t=h,"alternate"===g.direction&&(g.reversed=!g.reversed)):(g.pause(),g.completed||(g.completed=!0,f("complete"),"Promise"in window&&(p(),m=c()))),l=0)}a=void 0===a?{}:a;var h,t,l=0,p=null,m=c(),g=fa(a);g.reset=function(){var a=g.direction,c=g.loop;g.currentTime=
+0;g.progress=0;g.paused=!0;g.began=!1;g.completed=!1;g.reversed="reverse"===a;g.remaining="alternate"===a&&1===c?2:c;b(0);for(a=g.children.length;a--;)g.children[a].reset()};g.tick=function(a){h=a;t||(t=h);k((l+h-t)*q.speed)};g.seek=function(a){k(d(a))};g.pause=function(){var a=v.indexOf(g);-1<a&&v.splice(a,1);g.paused=!0};g.play=function(){g.paused&&(g.paused=!1,t=0,l=d(g.currentTime),v.push(g),B||ia())};g.reverse=function(){g.reversed=!g.reversed;t=0;l=d(g.currentTime)};g.restart=function(){g.pause();
+g.reset();g.play()};g.finished=m;g.reset();g.autoplay&&g.play();return g}var ga={update:void 0,begin:void 0,run:void 0,complete:void 0,loop:1,direction:"normal",autoplay:!0,offset:0},S={duration:1E3,delay:0,easing:"easeOutElastic",elasticity:500,round:0},W="translateX translateY translateZ rotate rotateX rotateY rotateZ scale scaleX scaleY scaleZ skewX skewY perspective".split(" "),H,h={arr:function(a){return Array.isArray(a)},obj:function(a){return-1<Object.prototype.toString.call(a).indexOf("Object")},
+pth:function(a){return h.obj(a)&&a.hasOwnProperty("totalLength")},svg:function(a){return a instanceof SVGElement},dom:function(a){return a.nodeType||h.svg(a)},str:function(a){return"string"===typeof a},fnc:function(a){return"function"===typeof a},und:function(a){return"undefined"===typeof a},hex:function(a){return/(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(a)},rgb:function(a){return/^rgb/.test(a)},hsl:function(a){return/^hsl/.test(a)},col:function(a){return h.hex(a)||h.rgb(a)||h.hsl(a)}},A=function(){function a(a,
+d,b){return(((1-3*b+3*d)*a+(3*b-6*d))*a+3*d)*a}return function(c,d,b,f){if(0<=c&&1>=c&&0<=b&&1>=b){var e=new Float32Array(11);if(c!==d||b!==f)for(var k=0;11>k;++k)e[k]=a(.1*k,c,b);return function(k){if(c===d&&b===f)return k;if(0===k)return 0;if(1===k)return 1;for(var h=0,l=1;10!==l&&e[l]<=k;++l)h+=.1;--l;var l=h+(k-e[l])/(e[l+1]-e[l])*.1,n=3*(1-3*b+3*c)*l*l+2*(3*b-6*c)*l+3*c;if(.001<=n){for(h=0;4>h;++h){n=3*(1-3*b+3*c)*l*l+2*(3*b-6*c)*l+3*c;if(0===n)break;var m=a(l,c,b)-k,l=l-m/n}k=l}else if(0===
+n)k=l;else{var l=h,h=h+.1,g=0;do m=l+(h-l)/2,n=a(m,c,b)-k,0<n?h=m:l=m;while(1e-7<Math.abs(n)&&10>++g);k=m}return a(k,d,f)}}}}(),Q=function(){function a(a,b){return 0===a||1===a?a:-Math.pow(2,10*(a-1))*Math.sin(2*(a-1-b/(2*Math.PI)*Math.asin(1))*Math.PI/b)}var c="Quad Cubic Quart Quint Sine Expo Circ Back Elastic".split(" "),d={In:[[.55,.085,.68,.53],[.55,.055,.675,.19],[.895,.03,.685,.22],[.755,.05,.855,.06],[.47,0,.745,.715],[.95,.05,.795,.035],[.6,.04,.98,.335],[.6,-.28,.735,.045],a],Out:[[.25,
+.46,.45,.94],[.215,.61,.355,1],[.165,.84,.44,1],[.23,1,.32,1],[.39,.575,.565,1],[.19,1,.22,1],[.075,.82,.165,1],[.175,.885,.32,1.275],function(b,c){return 1-a(1-b,c)}],InOut:[[.455,.03,.515,.955],[.645,.045,.355,1],[.77,0,.175,1],[.86,0,.07,1],[.445,.05,.55,.95],[1,0,0,1],[.785,.135,.15,.86],[.68,-.55,.265,1.55],function(b,c){return.5>b?a(2*b,c)/2:1-a(-2*b+2,c)/2}]},b={linear:A(.25,.25,.75,.75)},f={},e;for(e in d)f.type=e,d[f.type].forEach(function(a){return function(d,f){b["ease"+a.type+c[f]]=h.fnc(d)?
+d:A.apply($jscomp$this,d)}}(f)),f={type:f.type};return b}(),ha={css:function(a,c,d){return a.style[c]=d},attribute:function(a,c,d){return a.setAttribute(c,d)},object:function(a,c,d){return a[c]=d},transform:function(a,c,d,b,f){b[f]||(b[f]=[]);b[f].push(c+"("+d+")")}},v=[],B=0,ia=function(){function a(){B=requestAnimationFrame(c)}function c(c){var b=v.length;if(b){for(var d=0;d<b;)v[d]&&v[d].tick(c),d++;a()}else cancelAnimationFrame(B),B=0}return a}();q.version="2.2.0";q.speed=1;q.running=v;q.remove=
+function(a){a=P(a);for(var c=v.length;c--;)for(var d=v[c],b=d.animations,f=b.length;f--;)u(a,b[f].animatable.target)&&(b.splice(f,1),b.length||d.pause())};q.getValue=K;q.path=function(a,c){var d=h.str(a)?e(a)[0]:a,b=c||100;return function(a){return{el:d,property:a,totalLength:N(d)*(b/100)}}};q.setDashoffset=function(a){var c=N(a);a.setAttribute("stroke-dasharray",c);return c};q.bezier=A;q.easings=Q;q.timeline=function(a){var c=q(a);c.pause();c.duration=0;c.add=function(d){c.children.forEach(function(a){a.began=
+!0;a.completed=!0});m(d).forEach(function(b){var d=z(b,D(S,a||{}));d.targets=d.targets||a.targets;b=c.duration;var e=d.offset;d.autoplay=!1;d.direction=c.direction;d.offset=h.und(e)?b:L(e,b);c.began=!0;c.completed=!0;c.seek(d.offset);d=q(d);d.began=!0;d.completed=!0;d.duration>b&&(c.duration=d.duration);c.children.push(d)});c.seek(0);c.reset();c.autoplay&&c.restart();return c};return c};q.random=function(a,c){return Math.floor(Math.random()*(c-a+1))+a};return q});
+},{}],5:[function(require,module,exports) {
+/* global AFRAME, THREE */
+
+var anime = require('animejs');
+
+AFRAME.anime = anime;
+
+if (typeof AFRAME === 'undefined') {
+  throw new Error('Component attempted to register before AFRAME was available.');
+}
+
+var colorHelperFrom = new THREE.Color();
+var colorHelperTo = new THREE.Color();
+
+var utils = AFRAME.utils;
+var getComponentProperty = utils.entity.getComponentProperty;
+var setComponentProperty = utils.entity.setComponentProperty;
+var splitCache = {};
+
+var TYPE_COLOR = 'color';
+var PROP_POSITION = 'position';
+var PROP_ROTATION = 'rotation';
+var PROP_SCALE = 'scale';
+var STRING_COMPONENTS = 'components';
+var STRING_OBJECT3D = 'object3D';
+
+/**
+ * Animation component for A-Frame using anime.js.
+ *
+ * The component manually controls the tick by setting `autoplay: false` on anime.js and
+ * manually * calling `animation.tick()` in the tick handler. To pause or resume, we toggle a
+ * boolean * flag * `isAnimationPlaying`.
+ *
+ * anime.js animation config for tweenining Javascript objects and values works as:
+ *
+ *  config = {
+ *    targets: {foo: 0.0, bar: '#000'},
+ *    foo: 1.0,
+ *    bar: '#FFF'
+ *  }
+ *
+ * The above will tween each property in `targets`. The `to` values are set in the root of
+ * the config.
+ *
+ * @member {object} animation - anime.js instance.
+ * @member {boolean} animationIsPlaying - Control if animation is playing.
+ */
+AFRAME.registerComponent('animation', {
+  schema: {
+    autoplay: {default: true},
+    delay: {default: 0},
+    dir: {default: ''},
+    dur: {default: 1000},
+    easing: {default: 'easeInQuad'},
+    elasticity: {default: 400},
+    from: {default: ''},
+    loop: {
+      default: 0,
+      parse: function (value) {
+        // Boolean or integer.
+        if (value === true || value === 'true') { return true; }
+        if (value === false || value === 'false') { return false; }
+        return parseInt(value, 10);
+      }
+    },
+    property: {default: ''},
+    startEvents: {type: 'array'},
+    pauseEvents: {type: 'array'},
+    resumeEvents: {type: 'array'},
+    to: {default: ''},
+    type: {default: ''},
+    isRawProperty: {default: false}
+  },
+
+  multiple: true,
+
+  init: function () {
+    var self = this;
+
+    this.eventDetail = {name: this.attrName};
+    this.time = 0;
+
+    this.animation = null;
+    this.animationIsPlaying = false;
+    this.onStartEvent = this.onStartEvent.bind(this);
+    this.beginAnimation = this.beginAnimation.bind(this);
+    this.pauseAnimation = this.pauseAnimation.bind(this);
+    this.resumeAnimation = this.resumeAnimation.bind(this);
+
+    this.fromColor = {};
+    this.toColor = {};
+    this.targets = {};
+    this.targetsArray = [];
+
+    this.updateConfigForDefault = this.updateConfigForDefault.bind(this);
+    this.updateConfigForRawColor = this.updateConfigForRawColor.bind(this);
+
+    this.config = {
+      complete: function () {
+        self.animationIsPlaying = false;
+        self.el.emit('animationcomplete', self.eventDetail);
+      }
+    };
+  },
+
+  update: function () {
+    var config = this.config;
+    var data = this.data;
+
+    this.animationIsPlaying = false;
+
+    if (!data.property) { return; }
+
+    // Base config.
+    config.autoplay = false;
+    config.direction = data.dir;
+    config.duration = data.dur;
+    config.easing = data.easing;
+    config.elasticity = data.elasticity;
+    config.loop = data.loop;
+
+    // Start new animation.
+    this.createAndStartAnimation();
+  },
+
+  tick: function (t, dt) {
+    if (!this.animationIsPlaying) { return; }
+    this.time += dt;
+    this.animation.tick(this.time);
+  },
+
+  remove: function () {
+    this.pauseAnimation();
+    this.removeEventListeners();
+  },
+
+  pause: function () {
+    this.paused = true;
+    this.pausedWasPlaying = true;
+    this.pauseAnimation();
+    this.removeEventListeners();
+  },
+
+  /**
+   * `play` handler only for resuming scene.
+   */
+  play: function () {
+    if (!this.paused) { return; }
+    this.paused = false;
+    this.addEventListeners();
+    if (this.pausedWasPlaying) {
+      this.resumeAnimation();
+      this.pausedWasPlaying = false;
+    }
+  },
+
+  /**
+   * Start animation from scratch.
+   */
+  createAndStartAnimation: function () {
+    var data = this.data;
+
+    this.updateConfig();
+    this.animationIsPlaying = false;
+    this.animation = anime(this.config);
+
+    this.removeEventListeners();
+    this.addEventListeners();
+
+    // Wait for start events for animation.
+    if (!data.autoplay || data.startEvents && data.startEvents.length) { return; }
+
+    // Delay animation.
+    if (data.delay) {
+      setTimeout(this.beginAnimation, data.delay);
+      return;
+    }
+
+    // Play animation.
+    this.beginAnimation();
+  },
+
+  /**
+   * This is before animation start (including from startEvents).
+   * Set to initial state (config.from, time = 0, seekTime = 0).
+   */
+  beginAnimation: function () {
+    this.updateConfig();
+    this.time = 0;
+    this.animationIsPlaying = true;
+    this.stopRelatedAnimations();
+    this.el.emit('animationbegin', this.eventDetail);
+  },
+
+  pauseAnimation: function () {
+    this.animationIsPlaying = false;
+  },
+
+  resumeAnimation: function () {
+    this.animationIsPlaying = true;
+  },
+
+  /**
+   * startEvents callback.
+   */
+  onStartEvent: function () {
+    this.updateConfig();
+    if (this.animation) {
+      this.animation.pause();
+    }
+    this.animation = anime(this.config);
+
+    // Include the delay before each start event.
+    if (this.data.delay) {
+      setTimeout(this.beginAnimation, this.data.delay);
+      return;
+    }
+    this.beginAnimation();
+  },
+
+  /**
+   * rawProperty: true and type: color;
+   */
+  updateConfigForRawColor: function () {
+    var config = this.config;
+    var data = this.data;
+    var el = this.el;
+    var from;
+    var key;
+    var to;
+
+    if (this.waitComponentInitRawProperty(this.updateConfigForRawColor)) {
+      return;
+    }
+
+    from = data.from || getRawProperty(el, data.property);
+    to = data.to;
+
+    // Use r/g/b vector for color type.
+    this.setColorConfig(from, to);
+    from = this.fromColor;
+    to = this.toColor;
+
+    this.targetsArray.length = 0;
+    this.targetsArray.push(from);
+    config.targets = this.targetsArray;
+    for (key in to) { config[key] = to[key]; }
+
+    config.update = (function () {
+      var lastValue = {};
+      lastValue.r = from.r;
+      lastValue.g = from.g;
+      lastValue.b = from.b;
+
+      return function (anim) {
+        var value;
+        value = anim.animatables[0].target;
+        // For animation timeline.
+          if (value.r === lastValue.r &&
+              value.g === lastValue.g &&
+              value.b === lastValue.b) { return; }
+
+        setRawProperty(el, data.property, value, data.type);
+      };
+    })();
+  },
+
+  /**
+   * Stuff property into generic `property` key.
+   */
+  updateConfigForDefault: function () {
+    var config = this.config;
+    var data = this.data;
+    var el = this.el;
+    var from;
+    var key;
+    var isBoolean;
+    var isNumber;
+    var to;
+
+    if (this.waitComponentInitRawProperty(this.updateConfigForDefault)) {
+      return;
+    }
+
+    from = data.from || (
+      isRawProperty(data)
+        ? getRawProperty(el, data.property)
+        : getComponentProperty(el, data.property)
+    );
+    to = data.to;
+
+    isNumber = !isNaN(from || to);
+    if (isNumber) {
+      from = parseFloat(from);
+      to = parseFloat(to);
+    } else {
+      from = from ? from.toString() : from;
+      to = to ? to.toString() : to;
+    }
+
+    // Convert booleans to integer to allow boolean flipping.
+    isBoolean = to === 'true' || to === 'false';
+    if (isBoolean) {
+      from = data.from === 'true' ? 1 : 0;
+      to = data.to === 'true' ? 1 : 0;
+    }
+
+    this.targets.aframeProperty = from;
+    config.targets = this.targets;
+    config.aframeProperty = to;
+    config.update = (function () {
+      var lastValue = from;
+      return function (anim) {
+        var value;
+        value = anim.animatables[0].target.aframeProperty;
+
+        // Need to do a last value check for animation timeline since all the tweening
+        // begins simultaenously even if the value has not changed. Also better for perf
+        // anyways.
+        if (value === lastValue) { return; }
+        lastValue = value;
+
+        if (isBoolean) {
+          value = value >= 1 ? true : false;
+        }
+
+        if (isRawProperty(data)) {
+          setRawProperty(el, data.property, value, data.type);
+        } else {
+          setComponentProperty(el, data.property, value);
+        }
+      };
+    })();
+  },
+
+  /**
+   * Extend x/y/z/w onto the config.
+   * Update vector by modifying object3D.
+   */
+  updateConfigForVector: function () {
+    var config = this.config;
+    var data = this.data;
+    var el = this.el;
+    var key;
+    var from;
+    var to;
+
+    // Parse coordinates.
+    from = data.from
+      ? AFRAME.utils.coordinates.parse(data.from)  // If data.from defined, use that.
+      : getComponentProperty(el, data.property);  // If data.from not defined, get on the fly.
+    to = AFRAME.utils.coordinates.parse(data.to);
+
+    // Animate rotation through radians.
+    if (data.property === PROP_ROTATION) {
+      toRadians(from);
+      toRadians(to);
+    }
+
+    // Set to and from.
+    this.targetsArray.length = 0;
+    this.targetsArray.push(from);
+    config.targets = this.targetsArray;
+    for (key in to) { config[key] = to[key]; }
+
+    // If animating object3D transformation, run more optimized updater.
+    if (data.property === PROP_POSITION || data.property === PROP_ROTATION ||
+        data.property === PROP_SCALE) {
+      config.update = (function () {
+        var lastValue = {};
+        lastValue.x = from.x;
+        lastValue.y = from.y;
+        lastValue.z = from.z;
+
+        return function (anim) {
+          var value = anim.animatables[0].target;
+          // For animation timeline.
+          if (value.x === lastValue.x &&
+              value.y === lastValue.y &&
+              value.z === lastValue.z) { return; }
+          lastValue.x = value.x;
+          lastValue.y = value.y;
+          lastValue.z = value.z;
+          el.object3D[data.property].set(value.x, value.y, value.z);
+        };
+      })();
+      return;
+    }
+
+    // Animating some vector.
+    config.update = (function () {
+      var lastValue = {};
+      lastValue.x = from.x;
+      lastValue.y = from.y;
+      lastValue.z = from.z;
+
+      return function (anim) {
+        var value = anim.animations[0].target;
+        // For animation timeline.
+        if (value.x === lastValue.x &&
+            value.y === lastValue.y &&
+            value.z === lastValue.z) { return; }
+        lastValue.x = value.x;
+        lastValue.y = value.y;
+        lastValue.z = value.z;
+        setComponentProperty(el, data.property, value);
+      }
+    })();
+  },
+
+  /**
+   * Update the config before each run.
+   */
+  updateConfig: function () {
+    var propType;
+
+    // Route config type.
+    propType = getPropertyType(this.el, this.data.property);
+    if (isRawProperty(this.data) && this.data.type === TYPE_COLOR) {
+      this.updateConfigForRawColor();
+    } else if (propType === 'vec2' || propType === 'vec3' || propType === 'vec4') {
+      this.updateConfigForVector();
+    } else {
+      this.updateConfigForDefault();
+    }
+  },
+
+  /**
+   * Wait for component to initialize.
+   */
+  waitComponentInitRawProperty: function (cb) {
+    var componentName;
+    var data = this.data;
+    var el = this.el;
+    var self = this;
+
+    if (data.from) { return false; }
+
+    if (!data.property.startsWith(STRING_COMPONENTS)) { return false; }
+
+    componentName = splitDot(data.property)[1];
+    if (el.components[componentName]) { return false; }
+
+    el.addEventListener('componentinitialized', function wait (evt) {
+      if (evt.detail.name !== componentName) { return; }
+      cb();
+      // Since the config was created async, create the animation now since we missed it
+      // earlier.
+      self.animation = anime(self.config);
+      el.removeEventListener('componentinitialized', wait);
+    });
+    return true;
+  },
+
+  /**
+   * Make sure two animations on the same property don't fight each other.
+   * e.g., animation__mouseenter="property: material.opacity"
+   *       animation__mouseleave="property: material.opacity"
+   */
+  stopRelatedAnimations: function () {
+    var component;
+    var componentName;
+    for (componentName in this.el.components) {
+      component = this.el.components[componentName];
+      if (componentName === this.attrName) { continue; }
+      if (component.name !== 'animation') { continue; }
+      if (!component.animationIsPlaying) { continue; }
+      if (component.data.property !== this.data.property) { continue; }
+      component.animationIsPlaying = false;
+    }
+  },
+
+  addEventListeners: function () {
+    var data = this.data;
+    var el = this.el;
+    addEventListeners(el, data.startEvents, this.onStartEvent);
+    addEventListeners(el, data.pauseEvents, this.pauseAnimation);
+    addEventListeners(el, data.resumeEvents, this.resumeAnimation);
+  },
+
+  removeEventListeners: function () {
+    var data = this.data;
+    var el = this.el;
+    removeEventListeners(el, data.startEvents, this.onStartEvent);
+    removeEventListeners(el, data.pauseEvents, this.pauseAnimation);
+    removeEventListeners(el, data.resumeEvents, this.resumeAnimation);
+  },
+
+  setColorConfig: function (from, to) {
+    colorHelperFrom.set(from);
+    colorHelperTo.set(to);
+    from = this.fromColor;
+    to = this.toColor;
+    from.r = colorHelperFrom.r;
+    from.g = colorHelperFrom.g;
+    from.b = colorHelperFrom.b;
+    to.r = colorHelperTo.r;
+    to.g = colorHelperTo.g;
+    to.b = colorHelperTo.b;
+  }
+});
+
+/**
+ * Given property name, check schema to see what type we are animating.
+ * We just care whether the property is a vector.
+ */
+function getPropertyType (el, property) {
+  var component;
+  var componentName;
+  var split;
+  var propertyName;
+
+  split = property.split('.');
+  componentName = split[0];
+  propertyName = split[1];
+  component = el.components[componentName] || AFRAME.components[componentName];
+
+  // Primitives.
+  if (!component) { return null; }
+
+  // Dynamic schema. We only care about vectors anyways.
+  if (propertyName && !component.schema[propertyName]) { return null; }
+
+  // Multi-prop.
+  if (propertyName) { return component.schema[propertyName].type; }
+
+  // Single-prop.
+  return component.schema.type;
+}
+
+/**
+ * Convert object to radians.
+ */
+function toRadians (obj) {
+  obj.x = THREE.Math.degToRad(obj.x);
+  obj.y = THREE.Math.degToRad(obj.y);
+  obj.z = THREE.Math.degToRad(obj.z);
+}
+
+function addEventListeners (el, eventNames, handler) {
+  var i;
+  for (i = 0; i < eventNames.length; i++) {
+    el.addEventListener(eventNames[i], handler);
+  }
+}
+
+function removeEventListeners (el, eventNames, handler) {
+  var i;
+  for (i = 0; i < eventNames.length; i++) {
+    el.removeEventListener(eventNames[i], handler);
+  }
+}
+
+function getRawProperty (el, path) {
+  var i;
+  var split;
+  var value;
+  split = splitDot(path);
+  value = el;
+  for (i = 0; i < split.length; i++) {
+    value = value[split[i]];
+  }
+  return value;
+}
+
+function setRawProperty (el, path, value, type) {
+  var i;
+  var split;
+  var propertyName;
+  var targetValue;
+
+  // Walk.
+  split = splitDot(path);
+  targetValue = el;
+  for (i = 0; i < split.length - 1; i++) { targetValue = targetValue[split[i]]; }
+  propertyName = split[split.length - 1];
+
+  // Raw color.
+  if (type === TYPE_COLOR) {
+    if ('r' in targetValue[propertyName]) {
+      targetValue[propertyName].r = value.r;
+      targetValue[propertyName].g = value.g;
+      targetValue[propertyName].b = value.b;
+    } else {
+      targetValue[propertyName].x = value.r;
+      targetValue[propertyName].y = value.g;
+      targetValue[propertyName].z = value.b;
+    }
+    return;
+  }
+
+  targetValue[propertyName] = value;
+}
+
+function splitDot (path) {
+  if (path in splitCache) { return splitCache[path]; }
+  splitCache[path] = path.split('.');
+  return splitCache[path];
+}
+
+function isRawProperty (data) {
+  return data.isRawProperty || data.property.startsWith(STRING_COMPONENTS) ||
+         data.property.startsWith(STRING_OBJECT3D);
+}
+
+},{"animejs":28}],39:[function(require,module,exports) {
 module.exports = {
   "name": "cannon",
   "version": "0.6.2",
@@ -76242,7 +76883,7 @@ module.exports = {
   "dependencies": {}
 }
 ;
-},{}],60:[function(require,module,exports) {
+},{}],64:[function(require,module,exports) {
 module.exports = Mat3;
 
 var Vec3 = require('./Vec3');
@@ -76666,7 +77307,7 @@ Mat3.prototype.transpose = function( target ) {
     return target;
 };
 
-},{"./Vec3":84}],84:[function(require,module,exports) {
+},{"./Vec3":86}],86:[function(require,module,exports) {
 module.exports = Vec3;
 
 var Mat3 = require('./Mat3');
@@ -77150,7 +77791,7 @@ Vec3.prototype.isAntiparallelTo = function(v,precision){
 Vec3.prototype.clone = function(){
     return new Vec3(this.x, this.y, this.z);
 };
-},{"./Mat3":60}],96:[function(require,module,exports) {
+},{"./Mat3":64}],98:[function(require,module,exports) {
 function Utils(){}
 
 module.exports = Utils;
@@ -77175,7 +77816,7 @@ Utils.defaults = function(options, defaults){
     return options;
 };
 
-},{}],39:[function(require,module,exports) {
+},{}],41:[function(require,module,exports) {
 var Vec3 = require('../math/Vec3');
 var Utils = require('../utils/Utils');
 
@@ -77498,7 +78139,7 @@ AABB.prototype.overlapsRay = function(ray){
 
     return true;
 };
-},{"../math/Vec3":84,"../utils/Utils":96}],40:[function(require,module,exports) {
+},{"../math/Vec3":86,"../utils/Utils":98}],44:[function(require,module,exports) {
 module.exports = ArrayCollisionMatrix;
 
 /**
@@ -77571,7 +78212,7 @@ ArrayCollisionMatrix.prototype.setNumObjects = function(n) {
     this.matrix.length = n*(n-1)>>1;
 };
 
-},{}],54:[function(require,module,exports) {
+},{}],56:[function(require,module,exports) {
 /**
  * Base class for objects that dispatches events.
  * @class EventTarget
@@ -77672,7 +78313,7 @@ EventTarget.prototype = {
     }
 };
 
-},{}],68:[function(require,module,exports) {
+},{}],70:[function(require,module,exports) {
 module.exports = Quaternion;
 
 var Vec3 = require('./Vec3');
@@ -78162,7 +78803,7 @@ Quaternion.prototype.integrate = function(angularVelocity, dt, angularFactor, ta
 
     return target;
 };
-},{"./Vec3":84}],61:[function(require,module,exports) {
+},{"./Vec3":86}],62:[function(require,module,exports) {
 module.exports = Material;
 
 /**
@@ -78316,7 +78957,7 @@ Shape.types = {
 };
 
 
-},{"./Shape":79,"../math/Vec3":84,"../math/Quaternion":68,"../material/Material":61}],82:[function(require,module,exports) {
+},{"./Shape":79,"../math/Vec3":86,"../math/Quaternion":70,"../material/Material":62}],85:[function(require,module,exports) {
 var Vec3 = require('./Vec3');
 var Quaternion = require('./Quaternion');
 
@@ -78421,7 +79062,7 @@ Transform.vectorToLocalFrame = function(position, quaternion, worldVector, resul
     return result;
 };
 
-},{"./Vec3":84,"./Quaternion":68}],49:[function(require,module,exports) {
+},{"./Vec3":86,"./Quaternion":70}],50:[function(require,module,exports) {
 module.exports = ConvexPolyhedron;
 
 var Shape = require('./Shape');
@@ -79349,7 +79990,7 @@ ConvexPolyhedron.project = function(hull, axis, pos, quat, result){
     result[1] = min;
 };
 
-},{"./Shape":79,"../math/Vec3":84,"../math/Quaternion":68,"../math/Transform":82}],42:[function(require,module,exports) {
+},{"./Shape":79,"../math/Vec3":86,"../math/Quaternion":70,"../math/Transform":85}],43:[function(require,module,exports) {
 module.exports = Box;
 
 var Shape = require('./Shape');
@@ -79586,7 +80227,7 @@ Box.prototype.calculateWorldAABB = function(pos,quat,min,max){
     // });
 };
 
-},{"./Shape":79,"../math/Vec3":84,"./ConvexPolyhedron":49}],41:[function(require,module,exports) {
+},{"./Shape":79,"../math/Vec3":86,"./ConvexPolyhedron":50}],42:[function(require,module,exports) {
 module.exports = Body;
 
 var EventTarget = require('../utils/EventTarget');
@@ -80502,7 +81143,7 @@ Body.prototype.integrate = function(dt, quatNormalize, quatNormalizeFast){
     this.updateInertiaWorld();
 };
 
-},{"../utils/EventTarget":54,"../shapes/Shape":79,"../math/Vec3":84,"../math/Mat3":60,"../math/Quaternion":68,"../material/Material":61,"../collision/AABB":39,"../shapes/Box":42}],66:[function(require,module,exports) {
+},{"../utils/EventTarget":56,"../shapes/Shape":79,"../math/Vec3":86,"../math/Mat3":64,"../math/Quaternion":70,"../material/Material":62,"../collision/AABB":41,"../shapes/Box":43}],68:[function(require,module,exports) {
 module.exports = Plane;
 
 var Shape = require('./Shape');
@@ -80565,7 +81206,7 @@ Plane.prototype.calculateWorldAABB = function(pos, quat, min, max){
 Plane.prototype.updateBoundingSphereRadius = function(){
     this.boundingSphereRadius = Number.MAX_VALUE;
 };
-},{"./Shape":79,"../math/Vec3":84}],43:[function(require,module,exports) {
+},{"./Shape":79,"../math/Vec3":86}],45:[function(require,module,exports) {
 var Body = require('../objects/Body');
 var Vec3 = require('../math/Vec3');
 var Quaternion = require('../math/Quaternion');
@@ -80773,7 +81414,7 @@ Broadphase.prototype.aabbQuery = function(world, aabb, result){
     console.warn('.aabbQuery is not implemented in this Broadphase subclass.');
     return [];
 };
-},{"../objects/Body":41,"../math/Vec3":84,"../math/Quaternion":68,"../shapes/Shape":79,"../shapes/Plane":66}],45:[function(require,module,exports) {
+},{"../objects/Body":42,"../math/Vec3":86,"../math/Quaternion":70,"../shapes/Shape":79,"../shapes/Plane":68}],46:[function(require,module,exports) {
 module.exports = Constraint;
 
 var Utils = require('../utils/Utils');
@@ -80866,7 +81507,7 @@ Constraint.prototype.disable = function(){
 
 Constraint.idCounter = 0;
 
-},{"../utils/Utils":96}],98:[function(require,module,exports) {
+},{"../utils/Utils":98}],100:[function(require,module,exports) {
 module.exports = JacobianElement;
 
 var Vec3 = require('./Vec3');
@@ -80910,7 +81551,7 @@ JacobianElement.prototype.multiplyVectors = function(spatial,rotational){
     return spatial.dot(this.spatial) + rotational.dot(this.rotational);
 };
 
-},{"./Vec3":84}],52:[function(require,module,exports) {
+},{"./Vec3":86}],54:[function(require,module,exports) {
 module.exports = Equation;
 
 var JacobianElement = require('../math/JacobianElement'),
@@ -81174,7 +81815,7 @@ Equation.prototype.computeC = function(){
     return this.computeGiMGt() + this.eps;
 };
 
-},{"../math/JacobianElement":98,"../math/Vec3":84}],44:[function(require,module,exports) {
+},{"../math/JacobianElement":100,"../math/Vec3":86}],47:[function(require,module,exports) {
 module.exports = ContactEquation;
 
 var Equation = require('./Equation');
@@ -81311,7 +81952,7 @@ ContactEquation.prototype.getImpactVelocityAlongNormal = function(){
 };
 
 
-},{"./Equation":52,"../math/Vec3":84,"../math/Mat3":60}],71:[function(require,module,exports) {
+},{"./Equation":54,"../math/Vec3":86,"../math/Mat3":64}],72:[function(require,module,exports) {
 var Vec3 = require('../math/Vec3');
 
 module.exports = RaycastResult;
@@ -81434,7 +82075,7 @@ RaycastResult.prototype.set = function(
 	this.body = body;
 	this.distance = distance;
 };
-},{"../math/Vec3":84}],69:[function(require,module,exports) {
+},{"../math/Vec3":86}],71:[function(require,module,exports) {
 module.exports = Ray;
 
 var Vec3 = require('../math/Vec3');
@@ -82260,7 +82901,7 @@ function distanceFromIntersection(from, direction, position) {
 }
 
 
-},{"../math/Vec3":84,"../math/Quaternion":68,"../math/Transform":82,"../shapes/ConvexPolyhedron":49,"../shapes/Box":42,"../collision/RaycastResult":71,"../shapes/Shape":79,"../collision/AABB":39}],77:[function(require,module,exports) {
+},{"../math/Vec3":86,"../math/Quaternion":70,"../math/Transform":85,"../shapes/ConvexPolyhedron":50,"../shapes/Box":43,"../collision/RaycastResult":72,"../shapes/Shape":79,"../collision/AABB":41}],77:[function(require,module,exports) {
 module.exports = Solver;
 
 /**
@@ -82321,7 +82962,7 @@ Solver.prototype.removeAllEquations = function(){
 };
 
 
-},{}],63:[function(require,module,exports) {
+},{}],67:[function(require,module,exports) {
 module.exports = Pool;
 
 /**
@@ -82398,7 +83039,7 @@ Pool.prototype.resize = function (size) {
 };
 
 
-},{}],85:[function(require,module,exports) {
+},{}],87:[function(require,module,exports) {
 module.exports = Vec3Pool;
 
 var Vec3 = require('../math/Vec3');
@@ -82424,7 +83065,7 @@ Vec3Pool.prototype.constructObject = function(){
     return new Vec3();
 };
 
-},{"../math/Vec3":84,"./Pool":63}],53:[function(require,module,exports) {
+},{"../math/Vec3":86,"./Pool":67}],55:[function(require,module,exports) {
 module.exports = FrictionEquation;
 
 var Equation = require('./Equation');
@@ -82485,7 +83126,7 @@ FrictionEquation.prototype.computeB = function(h){
     return B;
 };
 
-},{"./Equation":52,"../math/Vec3":84,"../math/Mat3":60}],46:[function(require,module,exports) {
+},{"./Equation":54,"../math/Vec3":86,"../math/Mat3":64}],49:[function(require,module,exports) {
 module.exports = Narrowphase;
 
 var AABB = require('../collision/AABB');
@@ -84347,7 +84988,7 @@ Narrowphase.prototype.sphereHeightfield = function (
     }
 };
 
-},{"../collision/AABB":39,"../objects/Body":41,"../shapes/Shape":79,"../collision/Ray":69,"../math/Vec3":84,"../math/Transform":82,"../shapes/ConvexPolyhedron":49,"../math/Quaternion":68,"../solver/Solver":77,"../utils/Vec3Pool":85,"../equations/ContactEquation":44,"../equations/FrictionEquation":53}],67:[function(require,module,exports) {
+},{"../collision/AABB":41,"../objects/Body":42,"../shapes/Shape":79,"../collision/Ray":71,"../math/Vec3":86,"../math/Transform":85,"../shapes/ConvexPolyhedron":50,"../math/Quaternion":70,"../solver/Solver":77,"../utils/Vec3Pool":87,"../equations/ContactEquation":47,"../equations/FrictionEquation":55}],69:[function(require,module,exports) {
 module.exports = PointToPointConstraint;
 
 var Constraint = require('./Constraint');
@@ -84440,7 +85081,7 @@ PointToPointConstraint.prototype.update = function(){
     z.ri.copy(x.ri);
     z.rj.copy(x.rj);
 };
-},{"./Constraint":45,"../equations/ContactEquation":44,"../math/Vec3":84}],97:[function(require,module,exports) {
+},{"./Constraint":46,"../equations/ContactEquation":47,"../math/Vec3":86}],99:[function(require,module,exports) {
 module.exports = ConeEquation;
 
 var Vec3 = require('../math/Vec3');
@@ -84519,7 +85160,7 @@ ConeEquation.prototype.computeB = function(h){
 };
 
 
-},{"../math/Vec3":84,"../math/Mat3":60,"./Equation":52}],73:[function(require,module,exports) {
+},{"../math/Vec3":86,"../math/Mat3":64,"./Equation":54}],75:[function(require,module,exports) {
 module.exports = RotationalEquation;
 
 var Vec3 = require('../math/Vec3');
@@ -84590,7 +85231,7 @@ RotationalEquation.prototype.computeB = function(h){
 };
 
 
-},{"../math/Vec3":84,"../math/Mat3":60,"./Equation":52}],47:[function(require,module,exports) {
+},{"../math/Vec3":86,"../math/Mat3":64,"./Equation":54}],48:[function(require,module,exports) {
 module.exports = ConeTwistConstraint;
 
 var Constraint = require('./Constraint');
@@ -84681,7 +85322,7 @@ ConeTwistConstraint.prototype.update = function(){
 };
 
 
-},{"./Constraint":45,"./PointToPointConstraint":67,"../equations/ConeEquation":97,"../equations/RotationalEquation":73,"../equations/ContactEquation":44,"../math/Vec3":84}],48:[function(require,module,exports) {
+},{"./Constraint":46,"./PointToPointConstraint":69,"../equations/ConeEquation":99,"../equations/RotationalEquation":75,"../equations/ContactEquation":47,"../math/Vec3":86}],51:[function(require,module,exports) {
 var Utils = require('../utils/Utils');
 
 module.exports = ContactMaterial;
@@ -84762,7 +85403,7 @@ function ContactMaterial(m1, m2, options){
 
 ContactMaterial.idCounter = 0;
 
-},{"../utils/Utils":96}],51:[function(require,module,exports) {
+},{"../utils/Utils":98}],52:[function(require,module,exports) {
 module.exports = Cylinder;
 
 var Shape = require('./Shape');
@@ -84844,7 +85485,7 @@ function Cylinder( radiusTop, radiusBottom, height , numSegments ) {
 
 Cylinder.prototype = new ConvexPolyhedron();
 
-},{"./Shape":79,"../math/Vec3":84,"../math/Quaternion":68,"./ConvexPolyhedron":49}],50:[function(require,module,exports) {
+},{"./Shape":79,"../math/Vec3":86,"../math/Quaternion":70,"./ConvexPolyhedron":50}],53:[function(require,module,exports) {
 module.exports = DistanceConstraint;
 
 var Constraint = require('./Constraint');
@@ -84901,7 +85542,7 @@ DistanceConstraint.prototype.update = function(){
     normal.mult(halfDist, eq.ri);
     normal.mult(-halfDist, eq.rj);
 };
-},{"./Constraint":45,"../equations/ContactEquation":44}],55:[function(require,module,exports) {
+},{"./Constraint":46,"../equations/ContactEquation":47}],57:[function(require,module,exports) {
 module.exports = GSSolver;
 
 var Vec3 = require('../math/Vec3');
@@ -85043,7 +85684,7 @@ GSSolver.prototype.solve = function(dt,world){
     return iter;
 };
 
-},{"../math/Vec3":84,"../math/Quaternion":68,"./Solver":77}],56:[function(require,module,exports) {
+},{"../math/Vec3":86,"../math/Quaternion":70,"./Solver":77}],58:[function(require,module,exports) {
 module.exports = GridBroadphase;
 
 var Broadphase = require('./Broadphase');
@@ -85273,7 +85914,7 @@ GridBroadphase.prototype.collisionPairs = function(world,pairs1,pairs2){
     this.makePairsUnique(pairs1,pairs2);
 };
 
-},{"./Broadphase":43,"../math/Vec3":84,"../shapes/Shape":79}],59:[function(require,module,exports) {
+},{"./Broadphase":45,"../math/Vec3":86,"../shapes/Shape":79}],59:[function(require,module,exports) {
 var Shape = require('./Shape');
 var ConvexPolyhedron = require('./ConvexPolyhedron');
 var Vec3 = require('../math/Vec3');
@@ -85958,7 +86599,7 @@ Heightfield.prototype.setHeightsFromImage = function(image, scale){
     this.updateMinValue();
     this.update();
 };
-},{"./Shape":79,"./ConvexPolyhedron":49,"../math/Vec3":84,"../utils/Utils":96}],74:[function(require,module,exports) {
+},{"./Shape":79,"./ConvexPolyhedron":50,"../math/Vec3":86,"../utils/Utils":98}],80:[function(require,module,exports) {
 module.exports = RotationalMotorEquation;
 
 var Vec3 = require('../math/Vec3');
@@ -86030,7 +86671,7 @@ RotationalMotorEquation.prototype.computeB = function(h){
     return B;
 };
 
-},{"../math/Vec3":84,"../math/Mat3":60,"./Equation":52}],57:[function(require,module,exports) {
+},{"../math/Vec3":86,"../math/Mat3":64,"./Equation":54}],60:[function(require,module,exports) {
 module.exports = HingeConstraint;
 
 var Constraint = require('./Constraint');
@@ -86166,7 +86807,7 @@ HingeConstraint.prototype.update = function(){
 };
 
 
-},{"./Constraint":45,"./PointToPointConstraint":67,"../equations/RotationalEquation":73,"../equations/RotationalMotorEquation":74,"../equations/ContactEquation":44,"../math/Vec3":84}],58:[function(require,module,exports) {
+},{"./Constraint":46,"./PointToPointConstraint":69,"../equations/RotationalEquation":75,"../equations/RotationalMotorEquation":80,"../equations/ContactEquation":47,"../math/Vec3":86}],61:[function(require,module,exports) {
 module.exports = LockConstraint;
 
 var Constraint = require('./Constraint');
@@ -86260,7 +86901,7 @@ LockConstraint.prototype.update = function(){
 };
 
 
-},{"./Constraint":45,"./PointToPointConstraint":67,"../equations/RotationalEquation":73,"../equations/RotationalMotorEquation":74,"../equations/ContactEquation":44,"../math/Vec3":84}],62:[function(require,module,exports) {
+},{"./Constraint":46,"./PointToPointConstraint":69,"../equations/RotationalEquation":75,"../equations/RotationalMotorEquation":80,"../equations/ContactEquation":47,"../math/Vec3":86}],63:[function(require,module,exports) {
 module.exports = NaiveBroadphase;
 
 var Broadphase = require('./Broadphase');
@@ -86335,7 +86976,7 @@ NaiveBroadphase.prototype.aabbQuery = function(world, aabb, result){
 
     return result;
 };
-},{"./Broadphase":43,"./AABB":39}],65:[function(require,module,exports) {
+},{"./Broadphase":45,"./AABB":41}],65:[function(require,module,exports) {
 module.exports = ObjectCollisionMatrix;
 
 /**
@@ -86408,7 +87049,7 @@ ObjectCollisionMatrix.prototype.reset = function() {
 ObjectCollisionMatrix.prototype.setNumObjects = function(n) {
 };
 
-},{}],64:[function(require,module,exports) {
+},{}],66:[function(require,module,exports) {
 module.exports = Particle;
 
 var Shape = require('./Shape');
@@ -86455,7 +87096,7 @@ Particle.prototype.calculateWorldAABB = function(pos,quat,min,max){
     max.copy(pos);
 };
 
-},{"./Shape":79,"../math/Vec3":84}],99:[function(require,module,exports) {
+},{"./Shape":79,"../math/Vec3":86}],101:[function(require,module,exports) {
 var Vec3 = require('../math/Vec3');
 var Transform = require('../math/Transform');
 var RaycastResult = require('../collision/RaycastResult');
@@ -86738,7 +87379,7 @@ WheelInfo.prototype.updateWheel = function(chassis){
         this.clippedInvContactDotSuspension = 1.0;
     }
 };
-},{"../math/Vec3":84,"../math/Transform":82,"../collision/RaycastResult":71,"../utils/Utils":96}],70:[function(require,module,exports) {
+},{"../math/Vec3":86,"../math/Transform":85,"../collision/RaycastResult":72,"../utils/Utils":98}],73:[function(require,module,exports) {
 var Body = require('./Body');
 var Vec3 = require('../math/Vec3');
 var Quaternion = require('../math/Quaternion');
@@ -87442,7 +88083,7 @@ function resolveSingleBilateral(body1, pos1, body2, pos2, normal, impulse){
 
     return impulse;
 }
-},{"./Body":41,"../math/Vec3":84,"../math/Quaternion":68,"../collision/RaycastResult":71,"../collision/Ray":69,"../objects/WheelInfo":99}],78:[function(require,module,exports) {
+},{"./Body":42,"../math/Vec3":86,"../math/Quaternion":70,"../collision/RaycastResult":72,"../collision/Ray":71,"../objects/WheelInfo":101}],82:[function(require,module,exports) {
 module.exports = Sphere;
 
 var Shape = require('./Shape');
@@ -87501,7 +88142,7 @@ Sphere.prototype.calculateWorldAABB = function(pos,quat,min,max){
     }
 };
 
-},{"./Shape":79,"../math/Vec3":84}],72:[function(require,module,exports) {
+},{"./Shape":79,"../math/Vec3":86}],74:[function(require,module,exports) {
 var Body = require('./Body');
 var Sphere = require('../shapes/Sphere');
 var Box = require('../shapes/Box');
@@ -87723,7 +88364,7 @@ RigidVehicle.prototype.getWheelSpeed = function(wheelIndex){
     return w.dot(worldAxis);
 };
 
-},{"./Body":41,"../shapes/Sphere":78,"../shapes/Box":42,"../math/Vec3":84,"../constraints/HingeConstraint":57}],75:[function(require,module,exports) {
+},{"./Body":42,"../shapes/Sphere":82,"../shapes/Box":43,"../math/Vec3":86,"../constraints/HingeConstraint":60}],76:[function(require,module,exports) {
 var Shape = require('../shapes/Shape');
 var Broadphase = require('../collision/Broadphase');
 
@@ -88047,7 +88688,7 @@ SAPBroadphase.prototype.aabbQuery = function(world, aabb, result){
 
     return result;
 };
-},{"../shapes/Shape":79,"../collision/Broadphase":43}],76:[function(require,module,exports) {
+},{"../shapes/Shape":79,"../collision/Broadphase":45}],78:[function(require,module,exports) {
 module.exports = SPHSystem;
 
 var Shape = require('../shapes/Shape');
@@ -88262,7 +88903,7 @@ SPHSystem.prototype.nablaw = function(r){
     return nabla;
 };
 
-},{"../shapes/Shape":79,"../math/Vec3":84,"../math/Quaternion":68,"../shapes/Particle":64,"../objects/Body":41,"../material/Material":61}],80:[function(require,module,exports) {
+},{"../shapes/Shape":79,"../math/Vec3":86,"../math/Quaternion":70,"../shapes/Particle":66,"../objects/Body":42,"../material/Material":62}],81:[function(require,module,exports) {
 module.exports = SplitSolver;
 
 var Vec3 = require('../math/Vec3');
@@ -88417,7 +89058,7 @@ SplitSolver.prototype.solve = function(dt,world){
 function sortById(a, b){
     return b.id - a.id;
 }
-},{"../math/Vec3":84,"../math/Quaternion":68,"./Solver":77,"../objects/Body":41}],81:[function(require,module,exports) {
+},{"../math/Vec3":86,"../math/Quaternion":70,"./Solver":77,"../objects/Body":42}],83:[function(require,module,exports) {
 var Vec3 = require('../math/Vec3');
 
 module.exports = Spring;
@@ -88612,7 +89253,7 @@ Spring.prototype.applyForce = function(){
     bodyB.torque.vadd(rj_x_f,bodyB.torque);
 };
 
-},{"../math/Vec3":84}],100:[function(require,module,exports) {
+},{"../math/Vec3":86}],102:[function(require,module,exports) {
 var AABB = require('../collision/AABB');
 var Vec3 = require('../math/Vec3');
 
@@ -88847,7 +89488,7 @@ OctreeNode.prototype.removeEmptyNodes = function() {
     }
 };
 
-},{"../collision/AABB":39,"../math/Vec3":84}],83:[function(require,module,exports) {
+},{"../collision/AABB":41,"../math/Vec3":86}],84:[function(require,module,exports) {
 module.exports = Trimesh;
 
 var Shape = require('./Shape');
@@ -89409,7 +90050,7 @@ Trimesh.createTorus = function (radius, tube, radialSegments, tubularSegments, a
     return new Trimesh(vertices, indices);
 };
 
-},{"./Shape":79,"../math/Vec3":84,"../math/Quaternion":68,"../math/Transform":82,"../collision/AABB":39,"../utils/Octree":100}],101:[function(require,module,exports) {
+},{"./Shape":79,"../math/Vec3":86,"../math/Quaternion":70,"../math/Transform":85,"../collision/AABB":41,"../utils/Octree":102}],104:[function(require,module,exports) {
 module.exports = OverlapKeeper;
 
 /**
@@ -89505,7 +90146,7 @@ OverlapKeeper.prototype.getDiff = function(additions, removals) {
         }
     }
 };
-},{}],102:[function(require,module,exports) {
+},{}],105:[function(require,module,exports) {
 module.exports = TupleDictionary;
 
 /**
@@ -89572,7 +90213,7 @@ TupleDictionary.prototype.reset = function() {
     }
 };
 
-},{}],86:[function(require,module,exports) {
+},{}],88:[function(require,module,exports) {
 /* global performance */
 
 module.exports = World;
@@ -90606,7 +91247,7 @@ World.prototype.clearForces = function(){
     }
 };
 
-},{"../shapes/Shape":79,"../math/Vec3":84,"../math/Quaternion":68,"../solver/GSSolver":55,"../equations/ContactEquation":44,"../equations/FrictionEquation":53,"./Narrowphase":46,"../utils/EventTarget":54,"../collision/ArrayCollisionMatrix":40,"../collision/OverlapKeeper":101,"../material/Material":61,"../material/ContactMaterial":48,"../objects/Body":41,"../utils/TupleDictionary":102,"../collision/RaycastResult":71,"../collision/AABB":39,"../collision/Ray":69,"../collision/NaiveBroadphase":62}],26:[function(require,module,exports) {
+},{"../shapes/Shape":79,"../math/Vec3":86,"../math/Quaternion":70,"../solver/GSSolver":57,"../equations/ContactEquation":47,"../equations/FrictionEquation":55,"./Narrowphase":49,"../utils/EventTarget":56,"../collision/ArrayCollisionMatrix":44,"../collision/OverlapKeeper":104,"../material/Material":62,"../material/ContactMaterial":51,"../objects/Body":42,"../utils/TupleDictionary":105,"../collision/RaycastResult":72,"../collision/AABB":41,"../collision/Ray":71,"../collision/NaiveBroadphase":63}],27:[function(require,module,exports) {
 // Export classes
 module.exports = {
     version :                       require('../package.json').version,
@@ -90661,7 +91302,7 @@ module.exports = {
     World :                         require('./world/World'),
 };
 
-},{"../package.json":35,"./collision/AABB":39,"./collision/ArrayCollisionMatrix":40,"./objects/Body":41,"./shapes/Box":42,"./collision/Broadphase":43,"./constraints/Constraint":45,"./equations/ContactEquation":44,"./world/Narrowphase":46,"./constraints/ConeTwistConstraint":47,"./material/ContactMaterial":48,"./shapes/ConvexPolyhedron":49,"./shapes/Cylinder":51,"./constraints/DistanceConstraint":50,"./equations/Equation":52,"./utils/EventTarget":54,"./equations/FrictionEquation":53,"./solver/GSSolver":55,"./collision/GridBroadphase":56,"./shapes/Heightfield":59,"./constraints/HingeConstraint":57,"./constraints/LockConstraint":58,"./math/Mat3":60,"./material/Material":61,"./collision/NaiveBroadphase":62,"./collision/ObjectCollisionMatrix":65,"./utils/Pool":63,"./shapes/Particle":64,"./shapes/Plane":66,"./constraints/PointToPointConstraint":67,"./math/Quaternion":68,"./collision/Ray":69,"./objects/RaycastVehicle":70,"./collision/RaycastResult":71,"./objects/RigidVehicle":72,"./equations/RotationalEquation":73,"./equations/RotationalMotorEquation":74,"./collision/SAPBroadphase":75,"./objects/SPHSystem":76,"./shapes/Shape":79,"./solver/Solver":77,"./shapes/Sphere":78,"./solver/SplitSolver":80,"./objects/Spring":81,"./math/Transform":82,"./shapes/Trimesh":83,"./math/Vec3":84,"./utils/Vec3Pool":85,"./world/World":86}],108:[function(require,module,exports) {
+},{"../package.json":39,"./collision/AABB":41,"./collision/ArrayCollisionMatrix":44,"./objects/Body":42,"./shapes/Box":43,"./collision/Broadphase":45,"./constraints/Constraint":46,"./equations/ContactEquation":47,"./world/Narrowphase":49,"./constraints/ConeTwistConstraint":48,"./material/ContactMaterial":51,"./shapes/ConvexPolyhedron":50,"./shapes/Cylinder":52,"./constraints/DistanceConstraint":53,"./equations/Equation":54,"./utils/EventTarget":56,"./equations/FrictionEquation":55,"./solver/GSSolver":57,"./collision/GridBroadphase":58,"./shapes/Heightfield":59,"./constraints/HingeConstraint":60,"./constraints/LockConstraint":61,"./math/Mat3":64,"./material/Material":62,"./collision/NaiveBroadphase":63,"./collision/ObjectCollisionMatrix":65,"./utils/Pool":67,"./shapes/Particle":66,"./shapes/Plane":68,"./constraints/PointToPointConstraint":69,"./math/Quaternion":70,"./collision/Ray":71,"./objects/RaycastVehicle":73,"./collision/RaycastResult":72,"./objects/RigidVehicle":74,"./equations/RotationalEquation":75,"./equations/RotationalMotorEquation":80,"./collision/SAPBroadphase":76,"./objects/SPHSystem":78,"./shapes/Shape":79,"./solver/Solver":77,"./shapes/Sphere":82,"./solver/SplitSolver":81,"./objects/Spring":83,"./math/Transform":85,"./shapes/Trimesh":84,"./math/Vec3":86,"./utils/Vec3Pool":87,"./world/World":88}],110:[function(require,module,exports) {
 /**
  * Velocity, in m/s.
  */
@@ -90707,7 +91348,7 @@ module.exports = AFRAME.registerComponent('velocity', {
   }
 });
 
-},{}],105:[function(require,module,exports) {
+},{}],107:[function(require,module,exports) {
 module.exports = {
   'velocity':   require('./velocity'),
 
@@ -90722,7 +91363,7 @@ module.exports = {
   }
 };
 
-},{"./velocity":108}],104:[function(require,module,exports) {
+},{"./velocity":110}],106:[function(require,module,exports) {
 var process = require("process");
 /**
 
@@ -91175,7 +91816,7 @@ module.exports = (function(){
 
 }())
 
-},{"process":28}],90:[function(require,module,exports) {
+},{"process":31}],92:[function(require,module,exports) {
 var CANNON = require('cannon'),
     quickhull = require('./lib/THREE.quickhull');
 
@@ -91549,7 +92190,7 @@ function getMeshes (object) {
   return meshes;
 }
 
-},{"cannon":26,"./lib/THREE.quickhull":104}],38:[function(require,module,exports) {
+},{"cannon":27,"./lib/THREE.quickhull":106}],40:[function(require,module,exports) {
 /**
  * CANNON.shape2mesh
  *
@@ -91709,7 +92350,7 @@ CANNON.shape2mesh = function(body){
 
 module.exports = CANNON.shape2mesh;
 
-},{"cannon":26}],22:[function(require,module,exports) {
+},{"cannon":27}],23:[function(require,module,exports) {
 var CANNON = require('cannon'),
     mesh2shape = require('three-to-cannon');
 
@@ -92052,7 +92693,7 @@ var Body = {
 module.exports.definition = Body;
 module.exports.Component = AFRAME.registerComponent('body', Body);
 
-},{"cannon":26,"three-to-cannon":90,"../../../lib/CANNON-shape2mesh":38}],24:[function(require,module,exports) {
+},{"cannon":27,"three-to-cannon":92,"../../../lib/CANNON-shape2mesh":40}],25:[function(require,module,exports) {
 var Body = require('./body');
 
 /**
@@ -92064,7 +92705,7 @@ var DynamicBody = AFRAME.utils.extend({}, Body.definition);
 
 module.exports = AFRAME.registerComponent('dynamic-body', DynamicBody);
 
-},{"./body":22}],23:[function(require,module,exports) {
+},{"./body":23}],24:[function(require,module,exports) {
 var Body = require('./body');
 
 /**
@@ -92082,7 +92723,7 @@ StaticBody.schema = AFRAME.utils.extend({}, Body.definition.schema, {
 
 module.exports = AFRAME.registerComponent('static-body', StaticBody);
 
-},{"./body":22}],25:[function(require,module,exports) {
+},{"./body":23}],26:[function(require,module,exports) {
 var CANNON = require('cannon');
 
 var Shape = {
@@ -92195,7 +92836,7 @@ var Shape = {
 module.exports.definition = Shape;
 module.exports.Component = AFRAME.registerComponent('shape', Shape);
 
-},{"cannon":26}],10:[function(require,module,exports) {
+},{"cannon":27}],22:[function(require,module,exports) {
 var CANNON = require('cannon');
 
 module.exports = AFRAME.registerComponent('constraint', {
@@ -92338,7 +92979,7 @@ module.exports = AFRAME.registerComponent('constraint', {
   }
 });
 
-},{"cannon":26}],30:[function(require,module,exports) {
+},{"cannon":27}],32:[function(require,module,exports) {
 module.exports = {
   GRAVITY: -9.8,
   MAX_INTERVAL: 4 / 60,
@@ -92353,7 +92994,7 @@ module.exports = {
   }
 };
 
-},{}],91:[function(require,module,exports) {
+},{}],93:[function(require,module,exports) {
 /**
  * Driver - defines limited API to local and remote physics controllers.
  */
@@ -92431,7 +93072,7 @@ function abstractMethod () {
   throw new Error('Method not implemented.');
 }
 
-},{}],31:[function(require,module,exports) {
+},{}],33:[function(require,module,exports) {
 var CANNON = require('cannon'),
     Driver = require('./driver');
 
@@ -92552,7 +93193,7 @@ LocalDriver.prototype.getContacts = function () {
   return this.world.contacts;
 };
 
-},{"cannon":26,"./driver":91}],103:[function(require,module,exports) {
+},{"cannon":27,"./driver":93}],103:[function(require,module,exports) {
 var bundleFn = arguments[3];
 var sources = arguments[4];
 var cache = arguments[5];
@@ -92634,7 +93275,7 @@ module.exports = function (fn, options) {
     return worker;
 };
 
-},{}],92:[function(require,module,exports) {
+},{}],94:[function(require,module,exports) {
 /**
  * Stub version of webworkify, for debugging code outside of a webworker.
  */
@@ -92677,7 +93318,7 @@ EventTarget.prototype.postMessage = function (msg) {
   this.target.dispatchEvent('message', {data: msg});
 };
 
-},{}],93:[function(require,module,exports) {
+},{}],95:[function(require,module,exports) {
 module.exports = {
   INIT: 'init',
   STEP: 'step',
@@ -92697,7 +93338,7 @@ module.exports = {
   REMOVE_CONSTRAINT: 'remove-constraint'
 };
 
-},{}],34:[function(require,module,exports) {
+},{}],36:[function(require,module,exports) {
 var Driver = require('./driver');
 
 function AmmoDriver () {
@@ -92709,7 +93350,7 @@ AmmoDriver.prototype.constructor = AmmoDriver;
 
 module.exports = AmmoDriver;
 
-},{"./driver":91}],106:[function(require,module,exports) {
+},{"./driver":93}],108:[function(require,module,exports) {
 module.exports.slerp = function ( a, b, t ) {
   if ( t <= 0 ) return a;
   if ( t >= 1 ) return b;
@@ -92774,7 +93415,7 @@ module.exports.slerp = function ( a, b, t ) {
 
 };
 
-},{}],95:[function(require,module,exports) {
+},{}],96:[function(require,module,exports) {
 var CANNON = require('cannon');
 var mathUtils = require('./math');
 
@@ -93101,7 +93742,7 @@ function deserializeQuaternion (message) {
   return new CANNON.Quaternion(message[0], message[1], message[2], message[3]);
 }
 
-},{"cannon":26,"./math":106}],94:[function(require,module,exports) {
+},{"cannon":27,"./math":108}],97:[function(require,module,exports) {
 var Event = require('./event'),
     LocalDriver = require('./local-driver'),
     AmmoDriver = require('./ammo-driver'),
@@ -93195,7 +93836,7 @@ module.exports = function (self) {
   }
 };
 
-},{"./event":93,"./local-driver":31,"./ammo-driver":34,"../utils/protocol":95}],32:[function(require,module,exports) {
+},{"./event":95,"./local-driver":33,"./ammo-driver":36,"../utils/protocol":96}],34:[function(require,module,exports) {
 /* global performance */
 
 var webworkify = require('webworkify'),
@@ -93431,7 +94072,7 @@ WorkerDriver.prototype.getContacts = function () {
   });
 };
 
-},{"webworkify":103,"./webworkify-debug":92,"./driver":91,"./event":93,"./worker":94,"../utils/protocol":95}],33:[function(require,module,exports) {
+},{"webworkify":103,"./webworkify-debug":94,"./driver":93,"./event":95,"./worker":97,"../utils/protocol":96}],35:[function(require,module,exports) {
 var Driver = require('./driver');
 
 function NetworkDriver () {
@@ -93443,7 +94084,7 @@ NetworkDriver.prototype.constructor = NetworkDriver;
 
 module.exports = NetworkDriver;
 
-},{"./driver":91}],9:[function(require,module,exports) {
+},{"./driver":93}],10:[function(require,module,exports) {
 var CANNON = require('cannon'),
     CONSTANTS = require('./constants'),
     C_GRAV = CONSTANTS.GRAVITY,
@@ -93688,7 +94329,7 @@ module.exports = AFRAME.registerSystem('physics', {
   }
 });
 
-},{"cannon":26,"./constants":30,"./drivers/local-driver":31,"./drivers/worker-driver":32,"./drivers/network-driver":33,"./drivers/ammo-driver":34}],4:[function(require,module,exports) {
+},{"cannon":27,"./constants":32,"./drivers/local-driver":33,"./drivers/worker-driver":34,"./drivers/network-driver":35,"./drivers/ammo-driver":36}],6:[function(require,module,exports) {
 var CANNON = require('cannon');
 
 require('./src/components/math');
@@ -93708,7 +94349,7 @@ module.exports = {
 // Export CANNON.js.
 window.CANNON = window.CANNON || CANNON;
 
-},{"cannon":26,"./src/components/math":105,"./src/components/body/body":22,"./src/components/body/dynamic-body":24,"./src/components/body/static-body":23,"./src/components/shape/shape":25,"./src/components/constraint":10,"./src/system":9}],11:[function(require,module,exports) {
+},{"cannon":27,"./src/components/math":107,"./src/components/body/body":23,"./src/components/body/dynamic-body":25,"./src/components/body/static-body":24,"./src/components/shape/shape":26,"./src/components/constraint":22,"./src/system":10}],11:[function(require,module,exports) {
 /* global AFRAME */
 AFRAME.registerSystem('super-hands', {
   init: function init() {
@@ -93773,7 +94414,7 @@ AFRAME.registerComponent('hoverable', {
     }
   }
 });
-},{}],36:[function(require,module,exports) {
+},{}],38:[function(require,module,exports) {
 // base code used by grabbable for physics interactions
 module.exports = {
   schema: {
@@ -93999,7 +94640,7 @@ AFRAME.registerComponent('grabbable', inherit({}, physicsCore, buttonsCore, {
     }
   }
 }));
-},{"./prototypes/physics-grab-proto.js":36,"./prototypes/buttons-proto.js":37}],14:[function(require,module,exports) {
+},{"./prototypes/physics-grab-proto.js":38,"./prototypes/buttons-proto.js":37}],15:[function(require,module,exports) {
 /* global AFRAME, THREE */
 var inherit = AFRAME.utils.extendDeep;
 var buttonCore = require('./prototypes/buttons-proto.js');
@@ -94098,7 +94739,7 @@ AFRAME.registerComponent('stretchable', inherit({}, buttonCore, {
     }
   }
 }));
-},{"./prototypes/buttons-proto.js":37}],15:[function(require,module,exports) {
+},{"./prototypes/buttons-proto.js":37}],14:[function(require,module,exports) {
 /* global AFRAME */
 var inherit = AFRAME.utils.extendDeep;
 var buttonCore = require('./prototypes/buttons-proto.js');
@@ -94718,7 +95359,7 @@ AFRAME.registerPrimitive('a-locomotor', extendDeep({}, meshMixin, {
     'allow-scaling': 'locomotor-auto-config.stretch'
   }
 }));
-},{}],5:[function(require,module,exports) {
+},{}],3:[function(require,module,exports) {
 /* global AFRAME */
 
 if (typeof AFRAME === 'undefined') {
@@ -95231,7 +95872,7 @@ AFRAME.registerComponent('super-hands', {
     }
   }
 });
-},{"./systems/super-hands-system.js":11,"./reaction_components/hoverable.js":12,"./reaction_components/grabbable.js":13,"./reaction_components/stretchable.js":14,"./reaction_components/drag-droppable.js":15,"./reaction_components/draggable.js":16,"./reaction_components/droppable.js":17,"./reaction_components/clickable.js":18,"./misc_components/locomotor-auto-config.js":19,"./misc_components/progressive-controls.js":20,"./primitives/a-locomotor.js":21}],121:[function(require,module,exports) {
+},{"./systems/super-hands-system.js":11,"./reaction_components/hoverable.js":12,"./reaction_components/grabbable.js":13,"./reaction_components/stretchable.js":15,"./reaction_components/drag-droppable.js":14,"./reaction_components/draggable.js":16,"./reaction_components/droppable.js":17,"./reaction_components/clickable.js":18,"./misc_components/locomotor-auto-config.js":19,"./misc_components/progressive-controls.js":20,"./primitives/a-locomotor.js":21}],123:[function(require,module,exports) {
 var define;
 /**
  * @fileoverview gl-matrix - High performance matrix and vector operations
@@ -99482,7 +100123,7 @@ if(typeof(exports) !== 'undefined') {
   })(shim.exports);
 })(this);
 
-},{}],114:[function(require,module,exports) {
+},{}],116:[function(require,module,exports) {
 var glMatrix = require("gl-matrix")
   , vec3 = glMatrix.vec3;
 
@@ -99699,7 +100340,7 @@ Pointable.prototype.hand = function(){
  */
 Pointable.Invalid = { valid: false };
 
-},{"gl-matrix":121}],122:[function(require,module,exports) {
+},{"gl-matrix":123}],124:[function(require,module,exports) {
 //     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -100927,7 +101568,7 @@ Pointable.Invalid = { valid: false };
 
 }).call(this);
 
-},{}],125:[function(require,module,exports) {
+},{}],127:[function(require,module,exports) {
 var Pointable = require('./pointable'),
   glMatrix = require("gl-matrix")
   , vec3 = glMatrix.vec3
@@ -101092,7 +101733,7 @@ Bone.prototype.direction = function(){
 
 };
 
-},{"./pointable":114,"gl-matrix":121,"underscore":122}],113:[function(require,module,exports) {
+},{"./pointable":116,"gl-matrix":123,"underscore":124}],121:[function(require,module,exports) {
 var Pointable = require("./pointable")
   , Bone = require('./bone')
   , glMatrix = require("gl-matrix")
@@ -101546,7 +102187,7 @@ Hand.Invalid = {
   translation: function() { return vec3.create(); }
 };
 
-},{"./pointable":114,"./bone":125,"gl-matrix":121,"underscore":122}],120:[function(require,module,exports) {
+},{"./pointable":116,"./bone":127,"gl-matrix":123,"underscore":124}],122:[function(require,module,exports) {
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -101812,7 +102453,7 @@ function isObject(arg) {
 function isUndefined(arg) {
   return arg === void 0;
 }
-},{}],112:[function(require,module,exports) {
+},{}],114:[function(require,module,exports) {
 var glMatrix = require("gl-matrix")
   , vec3 = glMatrix.vec3
   , EventEmitter = require('events').EventEmitter
@@ -102297,7 +102938,7 @@ KeyTapGesture.prototype.toString = function() {
   return "KeyTapGesture ["+JSON.stringify(this)+"]";
 }
 
-},{"gl-matrix":121,"events":120,"underscore":122}],116:[function(require,module,exports) {
+},{"gl-matrix":123,"events":122,"underscore":124}],117:[function(require,module,exports) {
 var glMatrix = require("gl-matrix")
   , vec3 = glMatrix.vec3;
 
@@ -102439,7 +103080,7 @@ InteractionBox.prototype.toString = function() {
  */
 InteractionBox.Invalid = { valid: false };
 
-},{"gl-matrix":121}],124:[function(require,module,exports) {
+},{"gl-matrix":123}],125:[function(require,module,exports) {
 var process = require("process");
 var Dialog = module.exports = function(message, options){
   this.options = (options || {});
@@ -102587,7 +103228,7 @@ Dialog.warnBones = function(){
   }
 
 }
-},{"process":28}],115:[function(require,module,exports) {
+},{"process":31}],115:[function(require,module,exports) {
 var Pointable = require('./pointable'),
   Bone = require('./bone')
   , Dialog = require('./dialog')
@@ -102778,7 +103419,7 @@ Finger.prototype.toString = function() {
 
 Finger.Invalid = { valid: false };
 
-},{"./pointable":114,"./bone":125,"./dialog":124,"underscore":122}],111:[function(require,module,exports) {
+},{"./pointable":116,"./bone":127,"./dialog":125,"underscore":124}],113:[function(require,module,exports) {
 var Hand = require("./hand")
   , Pointable = require("./pointable")
   , createGesture = require("./gesture").createGesture
@@ -103283,7 +103924,7 @@ Frame.Invalid = {
   translation: function() { return vec3.create(); }
 };
 
-},{"./hand":113,"./pointable":114,"./gesture":112,"gl-matrix":121,"./interaction_box":116,"./finger":115,"underscore":122}],117:[function(require,module,exports) {
+},{"./hand":121,"./pointable":116,"./gesture":114,"gl-matrix":123,"./interaction_box":117,"./finger":115,"underscore":124}],118:[function(require,module,exports) {
 var CircularBuffer = module.exports = function(size) {
   this.pos = 0;
   this._buf = [];
@@ -103302,7 +103943,7 @@ CircularBuffer.prototype.push = function(o) {
   return this.pos++;
 }
 
-},{}],123:[function(require,module,exports) {
+},{}],126:[function(require,module,exports) {
 var Pipeline = module.exports = function (controller) {
   this.steps = [];
   this.controller = controller;
@@ -103356,7 +103997,7 @@ Pipeline.prototype.addWrappedStep = function (type, callback) {
   this.addStep(step);
   return step;
 };
-},{}],119:[function(require,module,exports) {
+},{}],120:[function(require,module,exports) {
 var Frame = require('./frame')
   , Hand = require('./hand')
   , Pointable = require('./pointable')
@@ -103432,7 +104073,7 @@ var JSONProtocol = exports.JSONProtocol = function(header) {
 
 
 
-},{"./frame":111,"./hand":113,"./pointable":114,"./finger":115,"underscore":122,"events":120}],134:[function(require,module,exports) {
+},{"./frame":113,"./hand":121,"./pointable":116,"./finger":115,"underscore":124,"events":122}],136:[function(require,module,exports) {
 var chooseProtocol = require('../protocol').chooseProtocol
   , EventEmitter = require('events').EventEmitter
   , _ = require('underscore');
@@ -103600,7 +104241,7 @@ BaseConnection.prototype.reportFocus = function(state) {
 }
 
 _.extend(BaseConnection.prototype, EventEmitter.prototype);
-},{"../protocol":119,"events":120,"underscore":122}],126:[function(require,module,exports) {
+},{"../protocol":120,"events":122,"underscore":124}],128:[function(require,module,exports) {
 var BaseConnection = module.exports = require('./base')
   , _ = require('underscore');
 
@@ -103700,14 +104341,14 @@ BrowserConnection.prototype.stopFocusLoop = function() {
   delete this.focusDetectorTimer;
 }
 
-},{"./base":134,"underscore":122}],135:[function(require,module,exports) {
+},{"./base":136,"underscore":124}],137:[function(require,module,exports) {
 var global = arguments[3];
 /// shim for browser packaging
 
 module.exports = function () {
   return global.WebSocket || global.MozWebSocket;
 };
-},{}],127:[function(require,module,exports) {
+},{}],129:[function(require,module,exports) {
 var WebSocket = require('ws')
   , BaseConnection = require('./base')
   , _ = require('underscore');
@@ -103732,7 +104373,7 @@ NodeConnection.prototype.setupSocket = function() {
   return socket;
 }
 
-},{"ws":135,"./base":134,"underscore":122}],110:[function(require,module,exports) {
+},{"ws":137,"./base":136,"underscore":124}],112:[function(require,module,exports) {
 var process = require("process");
 var Frame = require('./frame')
   , Hand = require('./hand')
@@ -104477,7 +105118,7 @@ Controller.prototype.useRegisteredPlugins = function(){
 
 _.extend(Controller.prototype, EventEmitter.prototype);
 
-},{"./frame":111,"./hand":113,"./pointable":114,"./finger":115,"./circular_buffer":117,"./pipeline":123,"events":120,"./gesture":112,"./dialog":124,"underscore":122,"./connection/browser":126,"./connection/node":127,"process":28}],128:[function(require,module,exports) {
+},{"./frame":113,"./hand":121,"./pointable":116,"./finger":115,"./circular_buffer":118,"./pipeline":126,"events":122,"./gesture":114,"./dialog":125,"underscore":124,"./connection/browser":128,"./connection/node":129,"process":31}],130:[function(require,module,exports) {
 var EventEmitter = require('events').EventEmitter
   , _ = require('underscore')
 
@@ -104565,7 +105206,7 @@ Region.prototype.mapToXY = function(position, width, height) {
 }
 
 _.extend(Region.prototype, EventEmitter.prototype)
-},{"events":120,"underscore":122}],129:[function(require,module,exports) {
+},{"events":122,"underscore":124}],131:[function(require,module,exports) {
 var Cursor = module.exports = function() {
   return function(frame) {
     var pointable = frame.pointables.sort(function(a, b) { return a.z - b.z })[0]
@@ -104576,12 +105217,12 @@ var Cursor = module.exports = function() {
   }
 }
 
-},{}],118:[function(require,module,exports) {
+},{}],119:[function(require,module,exports) {
 exports.UI = {
   Region: require("./ui/region"),
   Cursor: require("./ui/cursor")
 };
-},{"./ui/region":128,"./ui/cursor":129}],109:[function(require,module,exports) {
+},{"./ui/region":130,"./ui/cursor":131}],111:[function(require,module,exports) {
 // This file is automatically updated from package.json by grunt.
 module.exports = {
   full: '0.6.4',
@@ -104589,7 +105230,7 @@ module.exports = {
   minor: 6,
   dot: 4
 }
-},{}],107:[function(require,module,exports) {
+},{}],109:[function(require,module,exports) {
 /**
  * Leap is the global namespace of the Leap API.
  * @namespace Leap
@@ -104676,7 +105317,7 @@ module.exports = {
   }
 }
 
-},{"./controller":110,"./frame":111,"./gesture":112,"./hand":113,"./pointable":114,"./finger":115,"./interaction_box":116,"./circular_buffer":117,"./ui":118,"./protocol":119,"gl-matrix":121,"./version.js":109,"underscore":122,"events":120}],27:[function(require,module,exports) {
+},{"./controller":112,"./frame":113,"./gesture":114,"./hand":121,"./pointable":116,"./finger":115,"./interaction_box":117,"./circular_buffer":118,"./ui":119,"./protocol":120,"gl-matrix":123,"./version.js":111,"underscore":124,"events":122}],29:[function(require,module,exports) {
 var Leap = require('leapjs');
 
 module.exports = function (scope) {
@@ -104817,7 +105458,7 @@ module.exports = function (scope) {
     }
   };
 };
-},{"leapjs":107}],6:[function(require,module,exports) {
+},{"leapjs":109}],7:[function(require,module,exports) {
 var Leap = require('leapjs'),
     transform = require('../lib/leap.transform.js');
 
@@ -104868,7 +105509,7 @@ module.exports = AFRAME.registerSystem('leap', {
     return this.controller.frame(history);
   }
 });
-},{"leapjs":107,"../lib/leap.transform.js":27}],130:[function(require,module,exports) {
+},{"leapjs":109,"../lib/leap.transform.js":29}],132:[function(require,module,exports) {
 var DEFAULTS = {
   showArm: true,
   opacity: 1.0,
@@ -105112,7 +105753,7 @@ HandMesh.prototype.getMesh = function () {
 };
 
 module.exports = HandMesh;
-},{}],133:[function(require,module,exports) {
+},{}],135:[function(require,module,exports) {
 /**
  * Simple circular array data structure, for storing a finitely-sized list of values and
  * automatically dropping values that no longer fit in the array. All operations are O(1).
@@ -105133,7 +105774,7 @@ CircularArray.prototype.push = function (value) {
 
 module.exports = CircularArray;
 
-},{}],131:[function(require,module,exports) {
+},{}],133:[function(require,module,exports) {
 /**
  * Helper for raycasting, which chooses a raycaster direction based on hand position. Also supports
  * a debugging mode, in which the ray is visible.
@@ -105198,7 +105839,7 @@ Intersector.prototype.hide = function () {
 };
 
 module.exports = Intersector;
-},{}],132:[function(require,module,exports) {
+},{}],134:[function(require,module,exports) {
 /**
  * CANNON body controller for a single Leap Motion hand.
  */
@@ -105300,7 +105941,7 @@ HandBody.prototype.syncPalmBody = function () {
 }();
 
 module.exports = HandBody;
-},{}],7:[function(require,module,exports) {
+},{}],8:[function(require,module,exports) {
 var HandMesh = require('../lib/leap.hand-mesh'),
     CircularArray = require('circular-array'),
     Intersector = require('./helpers/intersector'),
@@ -105321,6 +105962,9 @@ var STATES = {
 	GRABBING: 'hand-grabbing',
 	HOLDING: 'hand-holding'
 };
+
+var handCursorDefualtId = 'handcursordefault';
+
 /**
  * A-Frame component for a single Leap Motion hand.
  */
@@ -105332,7 +105976,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			required: true
 		},
 		objects: {
-			default: '*'
+			default: '[grabbable]'
 		},
 		enablePhysics: {
 			default: false
@@ -105350,7 +105994,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			default: 0.95
 		}, // [0,1]
 		holdDistance: {
-			default: 0.2
+			default: 0.05
 		}, // m
 		holdSensitivity: {
 			default: 0.95
@@ -105358,6 +106002,12 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		releaseSensitivity: {
 			default: 0.75
 		}, // [0,1]
+		cursorMixin: {
+			default: ''
+		},
+		cursorDistance: {
+			default: 0.05
+		},
 		debug: {
 			default: false
 		}
@@ -105395,6 +106045,31 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		if (this.data.debug) {
 			this.el.object3D.add(this.intersector.getMesh());
 		}
+
+		var cursorEl = document.createElement('a-entity');
+		if (this.data.cursorMixin) {
+			cursorEl.setAttribute('mixin', this.data.cursorMixin);
+		} else {
+			var assets = this.el.sceneEl.querySelector('a-assets') || this.el.sceneEl.appendChild(document.createElement('a-assets'));
+			var cursorDefault = document.createElement('a-mixin');
+			cursorDefault.setAttribute('id', handCursorDefualtId);
+			cursorDefault.setAttribute('raycaster', 'showLine', true);
+			cursorDefault.setAttribute('super-hands', 'colliderEvent', 'raycaster-intersection');
+			cursorDefault.setAttribute('super-hands', 'colliderEventProperty', 'els');
+			cursorDefault.setAttribute('super-hands', 'colliderEndEvent', 'raycaster-intersection-cleared');
+			cursorDefault.setAttribute('super-hands', 'colliderEndEventProperty', 'clearedEls');
+			cursorDefault.setAttribute('super-hands', 'grabStartButtons', 'handpinch');
+			cursorDefault.setAttribute('super-hands', 'grabEndButtons', 'handrelease');
+			cursorDefault.setAttribute('super-hands', 'stretchStartButtons', 'handpinch');
+			cursorDefault.setAttribute('super-hands', 'stretchEndButtons', 'handrelease');
+			cursorDefault.setAttribute('super-hands', 'dragDropStartButtons', 'handpinch');
+			cursorDefault.setAttribute('super-hands', 'dragDropEndButtons', 'handrealse');
+			cursorDefault.setAttribute('static-body', 'shape: sphere; sphereRadius: 0.02');
+			assets.appendChild(cursorDefault);
+			cursorEl.setAttribute('mixin', handCursorDefualtId);
+		}
+		this.cursorEl = cursorEl;
+		this.el.appendChild(this.cursorEl);
 	},
 
 	update: function update() {
@@ -105420,6 +106095,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.el.object3D.remove(this.intersector.getMesh());
 			this.intersector = null;
 		}
+		this.el.removeChild(this.cursorEl);
 	},
 
 	tick: function tick() {
@@ -105442,11 +106118,6 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			var isGrabbing = this.grabStrength > (wasGrabbing ? this.data.releaseSensitivity : this.data.grabSensitivity);
 			var isHolding = this.holdStrength > (wasHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
 
-			// var {
-			// 	isPinching,
-			// 	isGrabbing,
-			// 	isHolding
-			// } = this.getGestures(hand, 20);
 			if (isPinching && !this.wasPinching) this.pinch(hand);
 			if (!isPinching && this.wasPinching) this.release(hand);
 
@@ -105456,6 +106127,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			if (isHolding && !this.isHolding) this.hold(hand);
 			if (!isHolding && this.isHolding) this.release(hand);
 			this.intersector.update(this.data, this.el.object3D, hand, isHolding);
+			this.updateHandRaycaster(hand);
 		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
 			this.release(null);
 		}
@@ -105463,63 +106135,50 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		if (hand && !this.isVisible) {
 			this.handMesh.show();
 			this.intersector.show();
+			this.cursorEl.setAttribute('visible', true);
 		}
 
 		if (!hand && this.isVisible) {
 			this.handMesh.hide();
 			this.intersector.hide();
+			this.cursorEl.setAttribute('visible', false);
 		}
 		this.isVisible = !!hand;
 	},
 
 	getHand: function getHand() {
-		var data = this.data,
-		    frame = this.system.getFrame();
+		var data = this.data;
+		var frame = this.system.getFrame();
 		return frame.hands.length ? frame.hands[frame.hands[0].type === data.hand ? 0 : 1] : null;
 	},
 
-	getGestures: function getGestures(hand, historySamples) {
-		var isPinching;
-		var isGrabbing;
-		var isHolding;
+	updateHandRaycaster: function updateHandRaycaster(hand) {
+		var origin = new THREE.Vector3();
+		var palmNormal = new THREE.Vector3();
+		var direction = new THREE.Vector3();
+		var position = new THREE.Vector3();
+		var distance = new THREE.Vector3();
 
-		if (hand.pinchStrength == 1) isPinching = true;else if (hand.pinchStrength == 0) isPinching = false;else {
-			var sum = 0;
-			for (var s = 0; s < historySamples; s++) {
-				var oldHand = this.system.getFrame(s).hand(hand.id);
-				if (!oldHand.valid) break;
-				sum += oldHand.pinchStrength;
-			}
-			var avg = sum / s;
-			if (hand.pinchStrength - avg < 0) isPinching = true;else if (hand.pinchStrength > 0) isPinching = false;
-		}
+		origin.fromArray(hand.palmPosition);
+		palmNormal.fromArray(hand.palmNormal);
+		direction.fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
+		distance.copy(direction).multiplyScalar(this.data.cursorDistance);
+		position.copy(origin).add(distance);
 
-		if (hand.grabStrength == 1) isGrabbing = true;else if (hand.grabStrength == 0) isGrabbing = false;else {
-			var sum = 0;
-			for (var s = 0; s < historySamples; s++) {
-				var oldHand = this.system.getFrame(s).hand(hand.id);
-				if (!oldHand.valid) break;
-				sum += oldHand.grabStrength;
-			}
-			var avg = sum / s;
-			if (hand.grabStrength - avg < 0) isGrabbing = true;else if (hand.grabStrength > 0) isGrabbing = false;
-		}
-
-		isHolding = isPinching || isGrabbing;
-
-		return {
-			isPinching: isPinching,
-			isGrabbing: isGrabbing,
-			isHolding: isHolding
-		};
+		var cursor = this.cursorEl;
+		cursor.object3D.position.set(position.x, position.y, position.z);
+		cursor.object3D.lookAt(origin);
+		cursor.setAttribute('raycaster', 'direction', direction);
 	},
 
 	pinch: function pinch(hand) {
-		var objects,
-		    results,
-		    eventDetail = this.getEventDetail(hand);
+		var _getEventDetail = this.getEventDetail(hand),
+		    objects = _getEventDetail.objects,
+		    results = _getEventDetail.results,
+		    eventDetail = _getEventDetail.eventDetail;
 
 		this.el.emit(EVENTS.HANDPINCH, eventDetail);
+		this.cursorEl.emit(EVENTS.HANDPINCH, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects)).map(function (el) {
 			return el.object3D;
@@ -105534,11 +106193,13 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 	},
 
 	grab: function grab(hand) {
-		var objects,
-		    results,
-		    eventDetail = this.getEventDetail(hand);
+		var _getEventDetail2 = this.getEventDetail(hand),
+		    objects = _getEventDetail2.objects,
+		    results = _getEventDetail2.results,
+		    eventDetail = _getEventDetail2.eventDetail;
 
 		this.el.emit(EVENTS.HANDGRAB, eventDetail);
+		this.cursorEl.emit(EVENTS.HANDGRAB, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects)).map(function (el) {
 			return el.object3D;
@@ -105553,11 +106214,13 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 	},
 
 	hold: function hold(hand) {
-		var objects,
-		    results,
-		    eventDetail = this.getEventDetail(hand);
+		var _getEventDetail3 = this.getEventDetail(hand),
+		    objects = _getEventDetail3.objects,
+		    results = _getEventDetail3.results,
+		    eventDetail = _getEventDetail3.eventDetail;
 
 		this.el.emit(EVENTS.HANDHOLD, eventDetail);
+		this.cursorEl.emit(EVENTS.HANDHOLD, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects)).map(function (el) {
 			return el.object3D;
@@ -105575,6 +106238,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		var eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDRELEASE, eventDetail);
+		this.cursorEl.emit(EVENTS.HANDRELEASE, eventDetail);
 
 		if (this.pinchTarget) {
 			this.pinchTarget.emit(EVENTS.HANDRELEASE, eventDetail);
@@ -105615,14 +106279,15 @@ function circularArrayAvg(array) {
 	}
 	return avg / array.length;
 }
-},{"../lib/leap.hand-mesh":130,"circular-array":133,"./helpers/intersector":131,"./helpers/hand-body":132}],2:[function(require,module,exports) {
+},{"../lib/leap.hand-mesh":132,"circular-array":135,"./helpers/intersector":133,"./helpers/hand-body":134}],2:[function(require,module,exports) {
 require('./src/leap-system');
 require('./src/leap-hand');
-},{"./src/leap-system":6,"./src/leap-hand":7}],1:[function(require,module,exports) {
+},{"./src/leap-system":7,"./src/leap-hand":8}],1:[function(require,module,exports) {
 require('aframe');
+require('aframe-animation-component');
 require('aframe-physics-system');
 require('super-hands');
 AFRAME.components['super-hands'].multiple = true;
 require('./index');
-},{"aframe":3,"aframe-physics-system":4,"super-hands":5,"./index":2}]},{},[1], null)
+},{"aframe":4,"aframe-animation-component":5,"aframe-physics-system":6,"super-hands":3,"./index":2}]},{},[1], null)
 //# sourceMappingURL=/aframe-leap-hands.map

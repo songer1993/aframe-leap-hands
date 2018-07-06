@@ -7,7 +7,8 @@
     "start": "yarn dist",
     "dev": "budo examples/index.js:examples/budo.js --port 8000",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dist": "NODE_ENV=production parcel build browser.js --no-minify -d ./dist -o aframe-leap-hands.js && NODE_ENV=productio parcel build browser.js -d ./dist -o aframe-leap-hands.min.js",
+    "dist": "NODE_ENV=production parcel build browser.js --no-minify -d ./dist -o aframe-leap-hands.js",
+    "dist-min": "NODE_ENV=productio parcel build browser.js -d ./dist -o aframe-leap-hands.min.js",
     "version": "npm run dist && git add -A dist",
     "postversion": "git push && git push --tags && npm publish"
   },
@@ -30,10 +31,11 @@
   },
   "homepage": "https://github.com/donmccurdy/aframe-leap-hands#readme",
   "dependencies": {
-    "circular-array": "0.0.1",
-    "leapjs": "^0.6.4",
     "aframe": "~0.8.2",
     "aframe-physics-system": "~3.1.2",
+    "aframe-animation-component": "~5.0.0",
+    "circular-array": "0.0.1",
+    "leapjs": "^0.6.4",
     "super-hands": "~2.1.0"
   },
   "devDependencies": {

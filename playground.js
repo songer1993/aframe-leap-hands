@@ -71,8 +71,3 @@ AFRAME.registerComponent('holdable', {
     this.handID = null;
   }
 });
-
-
-AFRAME.registerComponent('super-leap-hand', {
-
-});

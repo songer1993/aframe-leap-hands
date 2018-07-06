@@ -1,11 +1,11 @@
-var HandMesh = require('../lib/leap.hand-mesh'),
+const HandMesh = require('../lib/leap.hand-mesh'),
 	CircularArray = require('circular-array'),
 	Intersector = require('./helpers/intersector'),
 	HandBody = require('./helpers/hand-body');
 
-var nextID = 1;
+let nextID = 1;
 
-var EVENTS = {
+const EVENTS = {
 	CLICK: 'click',
 	HANDPINCH: 'handpinch',
 	HANDGRAB: 'handgrab',
@@ -13,11 +13,14 @@ var EVENTS = {
 	HANDRELEASE: 'handrelease'
 };
 
-var STATES = {
+const STATES = {
 	PINCHING: 'hand-pinching',
 	GRABBING: 'hand-grabbing',
 	HOLDING: 'hand-holding',
 };
+
+const handCursorDefualtId = 'handcursordefault';
+
 /**
  * A-Frame component for a single Leap Motion hand.
  */
@@ -29,7 +32,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			required: true
 		},
 		objects: {
-			default: '*'
+			default: '[grabbable]'
 		},
 		enablePhysics: {
 			default: false
@@ -47,7 +50,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			default: 0.95
 		}, // [0,1]
 		holdDistance: {
-			default: 0.2
+			default: 0.05
 		}, // m
 		holdSensitivity: {
 			default: 0.95
@@ -55,6 +58,12 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		releaseSensitivity: {
 			default: 0.75
 		}, // [0,1]
+		cursorMixin: {
+			default: ''
+		},
+		cursorDistance: {
+			default: 0.05
+		},
 		debug: {
 			default: false
 		}
@@ -73,8 +82,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.isGrabbing = false;
 		this.isHolding = false;
 
-		var pinchBufferLen = Math.floor(this.data.pinchDebounce / (1000 / 120));
-		var grabBufferLen = Math.floor(this.data.grabDebounce / (1000 / 120));
+		const pinchBufferLen = Math.floor(this.data.pinchDebounce / (1000 / 120));
+		const grabBufferLen = Math.floor(this.data.grabDebounce / (1000 / 120));
 		this.grabStrength = 0;
 		this.pinchStrength = 0;
 		this.holdStrength = 0;
@@ -92,10 +101,35 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		if (this.data.debug) {
 			this.el.object3D.add(this.intersector.getMesh());
 		}
+
+		const cursorEl = document.createElement('a-entity');
+		if (this.data.cursorMixin) {
+			cursorEl.setAttribute('mixin', this.data.cursorMixin);
+		} else {
+			const assets = this.el.sceneEl.querySelector('a-assets') || this.el.sceneEl.appendChild(document.createElement('a-assets'));
+			const cursorDefault = document.createElement('a-mixin');
+			cursorDefault.setAttribute('id', handCursorDefualtId);
+			cursorDefault.setAttribute('raycaster', 'showLine', true);
+			cursorDefault.setAttribute('super-hands', 'colliderEvent', 'raycaster-intersection');
+			cursorDefault.setAttribute('super-hands', 'colliderEventProperty', 'els');
+			cursorDefault.setAttribute('super-hands', 'colliderEndEvent', 'raycaster-intersection-cleared');
+			cursorDefault.setAttribute('super-hands', 'colliderEndEventProperty', 'clearedEls');
+			cursorDefault.setAttribute('super-hands', 'grabStartButtons', 'handpinch');
+			cursorDefault.setAttribute('super-hands', 'grabEndButtons', 'handrelease');
+			cursorDefault.setAttribute('super-hands', 'stretchStartButtons', 'handpinch');
+			cursorDefault.setAttribute('super-hands', 'stretchEndButtons', 'handrelease');
+			cursorDefault.setAttribute('super-hands', 'dragDropStartButtons', 'handpinch');
+			cursorDefault.setAttribute('super-hands', 'dragDropEndButtons', 'handrealse');
+			cursorDefault.setAttribute('static-body', 'shape: sphere; sphereRadius: 0.02');
+			assets.appendChild(cursorDefault);
+			cursorEl.setAttribute('mixin', handCursorDefualtId);
+		}
+		this.cursorEl = cursorEl;
+		this.el.appendChild(this.cursorEl);
 	},
 
 	update: function () {
-		var data = this.data;
+		const data = this.data;
 		if (data.enablePhysics && !this.handBody) {
 			this.handBody = new HandBody(this.el, this);
 		} else if (!data.enablePhysics && this.handBody) {
@@ -117,10 +151,11 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.el.object3D.remove(this.intersector.getMesh());
 			this.intersector = null;
 		}
+		this.el.removeChild(this.cursorEl);
 	},
 
 	tick: function () {
-		var hand = this.getHand();
+		const hand = this.getHand();
 
 		if (hand && hand.valid) {
 			this.handMesh.scaleTo(hand);
@@ -131,19 +166,14 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.pinchStrength = circularArrayAvg(this.pinchStrengthBuffer);
 			this.holdStrength = Math.max(this.grabStrength, this.pinchStrength)
 
-			var wasPinching = this.isPinching;
-			var wasGrabbing = this.isGrabbing;
-			var wasHolding = this.isHolding;
+			const wasPinching = this.isPinching;
+			const wasGrabbing = this.isGrabbing;
+			const wasHolding = this.isHolding;
 
-			var isPinching = this.pinchStrength > (wasPinching ? this.data.releaseSensitivity : this.data.pinchSensitivity);
-			var isGrabbing = this.grabStrength > (wasGrabbing ? this.data.releaseSensitivity : this.data.grabSensitivity);
-			var isHolding = this.holdStrength > (wasHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
+			const isPinching = this.pinchStrength > (wasPinching ? this.data.releaseSensitivity : this.data.pinchSensitivity);
+			const isGrabbing = this.grabStrength > (wasGrabbing ? this.data.releaseSensitivity : this.data.grabSensitivity);
+			const isHolding = this.holdStrength > (wasHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
 
-			// var {
-			// 	isPinching,
-			// 	isGrabbing,
-			// 	isHolding
-			// } = this.getGestures(hand, 20);
 			if (isPinching && !this.wasPinching) this.pinch(hand);
 			if (!isPinching && this.wasPinching) this.release(hand);
 
@@ -153,6 +183,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			if (isHolding && !this.isHolding) this.hold(hand);
 			if (!isHolding && this.isHolding) this.release(hand);
 			this.intersector.update(this.data, this.el.object3D, hand, isHolding);
+			this.updateHandRaycaster(hand);
 		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
 			this.release(null);
 		}
@@ -160,68 +191,52 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		if (hand && !this.isVisible) {
 			this.handMesh.show();
 			this.intersector.show();
+			this.cursorEl.setAttribute('visible', true);
 		}
 
 		if (!hand && this.isVisible) {
 			this.handMesh.hide();
 			this.intersector.hide();
+			this.cursorEl.setAttribute('visible', false);
 		}
 		this.isVisible = !!hand;
 	},
 
 	getHand: function () {
-		var data = this.data,
-			frame = this.system.getFrame();
+		const data = this.data;
+		const frame = this.system.getFrame();
 		return frame.hands.length ? frame.hands[frame.hands[0].type === data.hand ? 0 : 1] : null;
 	},
 
-	getGestures: function (hand, historySamples) {
-		var isPinching;
-		var isGrabbing;
-		var isHolding;
+	updateHandRaycaster: function (hand) {
+		const origin = new THREE.Vector3();
+		const palmNormal = new THREE.Vector3();
+		const direction = new THREE.Vector3();
+		const position = new THREE.Vector3();
+		const distance = new THREE.Vector3();
 
-		if (hand.pinchStrength == 1) isPinching = true;
-		else if (hand.pinchStrength == 0) isPinching = false;
-		else {
-			var sum = 0
-			for (var s = 0; s < historySamples; s++) {
-				var oldHand = this.system.getFrame(s).hand(hand.id)
-				if (!oldHand.valid) break;
-				sum += oldHand.pinchStrength
-			}
-			var avg = sum / s;
-			if (hand.pinchStrength - avg < 0) isPinching = true;
-			else if (hand.pinchStrength > 0) isPinching = false;
-		}
+		origin.fromArray(hand.palmPosition);
+		palmNormal.fromArray(hand.palmNormal);
+		direction.fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
+		distance.copy(direction).multiplyScalar(this.data.cursorDistance);
+		position.copy(origin).add(distance);
 
-		if (hand.grabStrength == 1) isGrabbing = true;
-		else if (hand.grabStrength == 0) isGrabbing = false;
-		else {
-			var sum = 0
-			for (var s = 0; s < historySamples; s++) {
-				var oldHand = this.system.getFrame(s).hand(hand.id)
-				if (!oldHand.valid) break;
-				sum += oldHand.grabStrength
-			}
-			var avg = sum / s;
-			if (hand.grabStrength - avg < 0) isGrabbing = true;
-			else if (hand.grabStrength > 0) isGrabbing = false;
-		}
-
-		isHolding = isPinching || isGrabbing;
-
-		return {
-			isPinching,
-			isGrabbing,
-			isHolding
-		};
+		const cursor = this.cursorEl;
+		cursor.object3D.position.set(position.x, position.y, position.z);
+		cursor.object3D.lookAt(origin);
+		cursor.setAttribute('raycaster', 'direction', direction);
 	},
 
 	pinch: function (hand) {
-		var objects, results,
-			eventDetail = this.getEventDetail(hand);
+		let {
+			objects,
+			results,
+			eventDetail
+		} = this.getEventDetail(hand);
+
 
 		this.el.emit(EVENTS.HANDPINCH, eventDetail);
+		this.cursorEl.emit(EVENTS.HANDPINCH, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
 			.map(function (el) {
@@ -237,10 +252,14 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 	},
 
 	grab: function (hand) {
-		var objects, results,
-			eventDetail = this.getEventDetail(hand);
+		let {
+			objects,
+			results,
+			eventDetail
+		} = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDGRAB, eventDetail);
+		this.cursorEl.emit(EVENTS.HANDGRAB, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
 			.map(function (el) {
@@ -257,10 +276,14 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 
 
 	hold: function (hand) {
-		var objects, results,
-			eventDetail = this.getEventDetail(hand);
+		let {
+			objects,
+			results,
+			eventDetail
+		} = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDHOLD, eventDetail);
+		this.cursorEl.emit(EVENTS.HANDHOLD, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
 			.map(function (el) {
@@ -277,9 +300,10 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 
 
 	release: function (hand) {
-		var eventDetail = this.getEventDetail(hand);
+		const eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDRELEASE, eventDetail);
+		this.cursorEl.emit(EVENTS.HANDRELEASE, eventDetail);
 
 		if (this.pinchTarget) {
 			this.pinchTarget.emit(EVENTS.HANDRELEASE, eventDetail);
@@ -313,9 +337,9 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 });
 
 function circularArrayAvg(array) {
-	var avg = 0;
+	let avg = 0;
 	array = array.array();
-	for (var i = 0; i < array.length; i++) {
+	for (let i = 0; i < array.length; i++) {
 		avg += array[i];
 	}
 	return avg / array.length;
