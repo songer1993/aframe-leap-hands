@@ -1,0 +1,114 @@
+<html>
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1">
+  <title>Examples • Grabbing</title>
+  <!-- <script src="./dist/aframe-leap-hands.min.js"></script> -->
+  <script src="./dist/aframe-leap-hands.js"></script>
+  <script src="./playground.js"></script>
+</head>
+
+<body>
+  <a-scene>
+    <a-assets>
+      <a-mixin id="progressivecontrolsgazedefault" position="0 0 -0.5" cursor="rayOrigin: mouse" geometry="primitive: ring;radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
+        material="color: #000; shader: flat" super-hands="colliderEvent:raycaster-intersection;
+                                colliderEventProperty:els;
+                                colliderEndEvent:raycaster-intersection-cleared;
+                                colliderEndEventProperty:clearedEls;" static-body="shape: sphere; sphereRadius: 0.02">
+      </a-mixin>
+      <a-mixin id="progressivecontrolspointdefault" raycaster="showLine:true" super-hands="colliderEvent:raycaster-intersection;
+                                colliderEventProperty:els;
+                                colliderEndEvent:raycaster-intersection-cleared;
+                                colliderEndEventProperty:clearedEls;" static-body="shape: sphere; sphereRadius: 0.02">
+      </a-mixin>
+      <a-mixin id="progressivecontrolstouchdefault" raycaster="showLine:true" super-hands="colliderEvent:raycaster-intersection;
+                                colliderEventProperty:els;
+                                colliderEndEvent:raycaster-intersection-cleared;
+                                colliderEndEventProperty:clearedEls;" static-body="shape: sphere; sphereRadius: 0.02">
+      </a-mixin>
+      <a-mixin id="super-left-hand" leap-hand="hand: left; enablePhysics: true; 
+			holdDistance: 1; holdDebounce: 100; holdSelector: [mixin='interactable'];
+			showLine: true; debug: false" super-hands="colliderEvent:raycaster-intersection;
+                                colliderEventProperty:els;
+                                colliderEndEvent:raycaster-intersection-cleared;
+                                colliderEndEventProperty:clearedEls;
+                                grabStartButtons: handpinch;
+                                grabEndButtons: handopen;
+                                stretchStartButtons: handpinch;
+                                stretchEndButtons: handopen;
+                                dragDropStartButtons: handpinch;
+																dragDropEndButtons: handopen" static-body="shape: sphere; sphereRadius: 0.02">
+      </a-mixin>
+      <a-mixin id="super-right-hand" leap-hand="hand: right; enablePhysics: true; 
+			holdDistance: 1; holdDebounce: 100; holdSelector: [mixin='interactable'];
+			showLine: true; debug: false" super-hands="colliderEvent:raycaster-intersection;
+                                colliderEventProperty:els;
+                                colliderEndEvent:raycaster-intersection-cleared;
+                                colliderEndEventProperty:clearedEls;
+                                grabStartButtons: handpinch;
+                                grabEndButtons: handopen;
+                                stretchStartButtons: handpinch;
+                                stretchEndButtons: handopen;
+                                dragDropStartButtons: handpinch;
+																dragDropEndButtons: handopen" static-body="shape: sphere; sphereRadius: 0.02">
+      </a-mixin>
+
+
+      <a-mixin id="interactable" hoverable grabbable stretchable draggable dropppable></a-mixin>
+
+      <a-mixin id="log-plane" geometry="width: 5; height: 10" material="color: #111; opacity: 0.5" text="color: lightgreen" clickable></a-mixin>
+      <!-- <a-mixin id="avatar-head" geometry="primitive: box; depth: 0.3; height: 0.3; width: 0.3" material="color: #222"></a-mixin> -->
+      <!-- <a-mixin id="my-firebase" firebase="apiKey: abc; authDomain: mysite.firebaseapp.com; databaseURL: https://mysite.firebaseio.com; storageBucket: mysite.appspot.com"></a-mixin> -->
+
+    </a-assets>
+
+    <!-- camera rig -->
+    <a-entity id="#cameraRig" position="0 0.3 0">
+      <!-- camera setting -->
+      <a-camera near=0.01 fov=110 position="0 0 0">
+        <!-- gaze controls -->
+        <a-entity class="gazecaster"></a-entity>
+
+        <!-- leap hands -->
+        <a-entity id="left-hand" mixin="super-left-hand"></a-entity>
+        <a-entity id="right-hand" mixin="super-right-hand"></a-entity>
+        <!-- <a-entity leap-hand="hand: right; enablePhysics: true; holdDistance: 1; holdDebounce: 100; showLine: true; debug: false; " mixin="super-leap-hand"></a-entity> -->
+      </a-camera>
+
+      <a-entity class="right-controller"></a-entity>
+      <a-entity class="left-controller"></a-entity>
+    </a-entity>
+
+
+    <a-box id="box1" width="0.25" height="0.25" depth="0.25" position="-0.125 0.01 -0.5" color="red" dynamic-body mixin="interactable"></a-box>
+    <a-box id="box2" width="0.25" height="0.25" depth="0.25" position="0.00 0.4 -0.5" color="green" dynamic-body mixin="interactable"></a-box>
+    <a-box id="box3" width="0.25" height="0.25" depth="0.25" position="0.125 0.01 -0.5" color="blue" dynamic-body mixin="interactable"></a-box>
+
+    <!-- Terrain -->
+    <a-grid static-body></a-grid>
+
+    <!-- Lighting -->
+    <a-light type="ambient" color="#ccc"></a-light>
+    <a-light color="#ddf" distance="100" intensity="0.4" type="point"></a-light>
+    <a-light color="#ddf" position="3 10 -10" distance="50" intensity="0.4" type="point"></a-light>
+  </a-scene>
+  <script>
+    var box1 = document.querySelector('#box1');
+    var box2 = document.querySelector('#box2');
+    var box3 = document.querySelector('#box3');
+
+    var rightHand = document.querySelector("#right-hand");
+    var leftHand = document.querySelector("#left-hand");
+    // rightHand.setAttribute('super-hands',
+    // 	"colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: handopen; stretchStartButtons: handpinch; stretchEndButtons: handopen; dragDropStartButtons: handpinch; dragDropEndButtons: handopen"
+    // )
+    // leftHand.setAttribute('super-hands',
+    // 	"colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: handopen; stretchStartButtons: handpinch; stretchEndButtons: handopen; dragDropStartButtons: handpinch; dragDropEndButtons: handopen"
+    // )
+  </script>
+</body>
+
+</html>

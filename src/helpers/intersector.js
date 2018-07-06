@@ -2,7 +2,7 @@
  * Helper for raycasting, which chooses a raycaster direction based on hand position. Also supports
  * a debugging mode, in which the ray is visible.
  */
-function Intersector () {
+function Intersector() {
   this.arrowHelper = this.createArrowHelper();
   this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(), 0, 0.2);
 }
@@ -11,7 +11,6 @@ Intersector.prototype.update = function (options, object3D, hand, isHolding) {
   // Update options.
   this.holdDistance = options.holdDistance;
   this.debug = options.debug;
-  this.showLine = options.showLine;
 
   // Update raycaster.
   this.raycaster.far = this.holdDistance;
@@ -24,7 +23,7 @@ Intersector.prototype.update = function (options, object3D, hand, isHolding) {
   object3D.localToWorld(this.raycaster.ray.origin);
 
   // Update arrow helper.
-  if (this.debug || this.showLine) {
+  if (this.debug) {
     this.arrowHelper = this.arrowHelper || this.createArrowHelper();
     this.arrowHelper.position.copy(this.raycaster.ray.origin);
     object3D.worldToLocal(this.arrowHelper.position);

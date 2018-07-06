@@ -1,5 +1,5 @@
 var Leap = require('leapjs'),
-    transform = require('../lib/leap.transform.js');
+  transform = require('../lib/leap.transform.js');
 
 // Defaults from leap.transform.js.
 var DEFAULT_SCALE = 0.001;
@@ -13,8 +13,12 @@ Leap.Controller.plugin('transform', transform);
  */
 module.exports = AFRAME.registerSystem('leap', {
   schema: {
-    vr: {default: true},
-    scale: {default: DEFAULT_SCALE},
+    vr: {
+      default: true
+    },
+    scale: {
+      default: DEFAULT_SCALE
+    },
     position: {
       type: 'vec3',
       default: {
@@ -39,7 +43,7 @@ module.exports = AFRAME.registerSystem('leap', {
       .use('transform', this.data);
   },
 
-  getFrame: function () {
-    return this.controller.frame();
+  getFrame: function (history = 0) {
+    return this.controller.frame(history);
   }
 });

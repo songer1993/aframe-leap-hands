@@ -31,11 +31,12 @@
   "homepage": "https://github.com/donmccurdy/aframe-leap-hands#readme",
   "dependencies": {
     "circular-array": "0.0.1",
-    "leapjs": "^0.6.4"
-  },
-  "devDependencies": {
+    "leapjs": "^0.6.4",
     "aframe": "~0.8.2",
     "aframe-physics-system": "~3.1.2",
+    "super-hands": "~2.1.0"
+  },
+  "devDependencies": {
     "browserify": "^14.1.0",
     "budo": "^9.4.7",
     "parcel-bundler": "~1.8.0"

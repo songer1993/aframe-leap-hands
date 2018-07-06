@@ -1,0 +1,348 @@
+/* global AFRAME */
+/* global THREE */
+var HandMesh = require('../lib/leap.hand-mesh'),
+	CircularArray = require('circular-array'),
+	HandBody = require('./helpers/hand-body');
+
+var bind = AFRAME.utils.bind;
+
+var nextID = 1;
+
+var EVENTS = {
+	CLICK: 'click',
+	HANDENTER: 'handenter',
+	HANDPINCH: 'handpinch',
+	HANDLEAVE: 'handleave',
+	HANDOPEN: 'handopen'
+};
+
+var STATES = {
+	PINCHING: 'hand-pinching',
+	HOVERING: 'hand-hovering',
+	HOVERED: 'hand-hovered'
+};
+
+/**
+ * A-Frame component for a single Leap Motion hand.
+ */
+module.exports = AFRAME.registerComponent('leap-hand', {
+	dependencies: ['raycaster'],
+
+	schema: {
+		hand: {
+			default: '',
+			oneOf: ['left', 'right'],
+			required: true
+		},
+		enablePhysics: {
+			default: false
+		},
+		holdDistance: {
+			default: 0.2
+		}, // m
+		holdDebounce: {
+			default: 100
+		}, // ms
+		holdSelector: {
+			default: '[holdable]'
+		},
+		holdSensitivity: {
+			default: 0.95
+		}, // [0,1]
+		releaseSensitivity: {
+			default: 0.75
+		}, // [0,1]
+		showLine: {
+			default: true
+		},
+		debug: {
+			default: false
+		}
+	},
+
+	init: function () {
+		var self = this;
+
+		this.handPinchEl = null;
+		this.intersection = null;
+		this.intersectedEl = null;
+
+
+		this.eventDetail = {};
+		this.intersectedEventDetail = {
+			handEl: this.el
+		};
+
+		// Bind methods.
+		this.onIntersection = bind(this.onIntersection, this);
+		this.onIntersectionCleared = bind(this.onIntersectionCleared, this);
+
+		this.system = this.el.sceneEl.systems.leap;
+
+		this.handID = nextID++;
+		this.hand = /** @type {Leap.Hand} */ null;
+		this.handBody = /** @type {HandBody} */ null;
+		this.handMesh = new HandMesh();
+		this.el.setObject3D('mesh', this.handMesh.getMesh());
+		this.handMesh.hide();
+
+		this.isVisible = false;
+		this.isHolding = false;
+
+		var bufferLen = Math.floor(this.data.holdDebounce / (1000 / 120));
+		this.grabStrength = 0;
+		this.pinchStrength = 0;
+		this.grabStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(bufferLen);
+		this.pinchStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(bufferLen);
+
+		this.createIntersector();
+	},
+
+	update: function () {
+		var data = this.data;
+		if (data.enablePhysics && !this.handBody) {
+			this.handBody = new HandBody(this.el, this);
+		} else if (!data.enablePhysics && this.handBody) {
+			this.handBody.remove();
+			this.handBody = null;
+		}
+	},
+
+	play: function () {
+		this.addEventListeners();
+	},
+
+	pause: function () {
+		this.removeEventListeners();
+	},
+
+	remove: function () {
+		this.el.removeState(STATES.HOVERING);
+		if (this.intersectedEl) {
+			this.intersectedEl.removeState(STATES.HOVERED);
+		}
+		this.removeEventListeners();
+
+		if (this.handMesh) {
+			this.el.removeObject3D('mesh');
+			this.handMesh = null;
+		}
+		if (this.handBody) {
+			this.handBody.remove();
+			this.handBody = null;
+		}
+	},
+
+	tick: function () {
+		var hand = this.getHand();
+
+		if (hand && hand.valid) {
+			this.handMesh.scaleTo(hand);
+			this.handMesh.formTo(hand);
+			this.grabStrengthBuffer.push(hand.grabStrength);
+			this.pinchStrengthBuffer.push(hand.pinchStrength);
+			this.grabStrength = circularArrayAvg(this.grabStrengthBuffer);
+			this.pinchStrength = circularArrayAvg(this.pinchStrengthBuffer);
+			var wasPinching = this.el.is(STATES.PINCHING);
+			var isPinching = this.pinchStrength > (wasPinching ? this.data.releaseSensitivity : this.data.holdSensitivity);
+			this.updateIntersector(this.data, this.el.object3D, hand, isPinching);
+			if (isPinching && !wasPinching) this.pinch();
+			if (!isPinching && wasPinching) this.open();
+		} else if (this.isHolding) {
+			this.open();
+		}
+
+		if (hand && !this.isVisible) {
+			this.handMesh.show();
+			// this.intersector.show();
+			this.el.setAttribute('visible', true);
+		}
+
+		if (!hand && this.isVisible) {
+			this.handMesh.hide();
+			// this.intersector.hide();
+			this.el.setAttribute('visible', false);
+		}
+		this.isVisible = !!hand;
+	},
+
+	addEventListeners: function () {
+		var el = this.el;
+		el.addEventListener('raycaster-intersection', this.onIntersection);
+		el.addEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
+	},
+
+	removeEventListeners: function () {
+		var el = this.el;
+		el.removeEventListener('raycaster-intersection', this.onIntersection);
+		el.removeEventListener('raycaster-intersection-cleared', this.onIntersectionCleared);
+	},
+
+	getHand: function () {
+		var data = this.data,
+			frame = this.system.getFrame();
+		return frame.hands.length ? frame.hands[frame.hands[0].type === data.hand ? 0 : 1] : null;
+	},
+
+	getEventDetail: function (hand) {
+		return {
+			hand: hand,
+			handID: this.handID,
+			body: this.handBody ? this.handBody.palmBody : null
+		};
+	},
+
+	createIntersector: function () {
+		var el = this.el;
+		var data = this.data;
+		el.setAttribute('raycaster', 'origin', '0 0 0');
+		el.setAttribute('raycaster', 'direction', '0 0 0');
+		el.setAttribute('raycaster', 'near', 0);
+		el.setAttribute('raycaster', 'far', data.holdDistance);
+		el.setAttribute('raycaster', 'showLine', data.showLine);
+		el.setAttribute('raycaster', 'objects', data.holdSelector);
+	},
+
+	updateIntersector: function (options, object3D, hand, isHolding) {
+		this.el.setAttribute('raycaster', 'far', options.holdDistance);
+		this.el.setAttribute('raycaster', 'showLine', options.showLine);
+		var origin = new THREE.Vector3();
+		var palmNormal = new THREE.Vector3();
+		var direction = new THREE.Vector3();
+		origin.fromArray(hand.palmPosition);
+		palmNormal.fromArray(hand.palmNormal);
+		direction.fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
+		this.el.setAttribute('raycaster', 'origin', origin);
+		this.el.setAttribute('raycaster', 'direction', direction);
+	},
+
+	open: function () {
+		console.log("open");
+		this.twoWayEmit(EVENTS.HANDOPEN);
+
+		// If intersected entity has changed since the HANDPINCH, still emit HANDOPEN on the
+		// previously cursorUp entity.
+		if (this.handPinchEl && this.handPinchEl !== this.intersectedEl) {
+			this.intersectedEventDetail.intersection = null;
+			this.handPinchEl.emit(EVENTS.HANDOPEN, this.intersectedEventDetail);
+		}
+
+		if (this.intersectedEl && this.handPinchEl === this.intersectedEl) {
+			this.twoWayEmit(EVENTS.CLICK);
+		}
+
+		this.handPinchEl = null;
+		this.el.removeState(STATES.PINCHING);
+	},
+
+	pinch: function () {
+		console.log('pinch');
+		this.twoWayEmit(EVENTS.HANDPINCH, this.intersectedEventDetail);
+		this.handPinchEl = this.intersectedEl;
+		this.el.addState(STATES.PINCHING);
+	},
+	/**
+	 * Handle intersection.
+	 */
+	onIntersection: function (evt) {
+		var handEl = this.el;
+		var index;
+		var intersectedEl;
+		var intersection;
+
+		// Select closest object, excluding the cursor.
+		index = evt.detail.els[0] === handEl ? 1 : 0;
+		intersection = evt.detail.intersections[index];
+		intersectedEl = evt.detail.els[index];
+
+		// If cursor is the only intersected object, ignore the event.
+		if (!intersectedEl) {
+			return;
+		}
+
+		// Already intersecting this entity.
+		if (this.intersectedEl === intersectedEl) {
+			this.intersection = intersection;
+			return;
+		}
+
+		// Unset current intersection.
+		this.clearCurrentIntersection();
+
+		this.setIntersection(intersectedEl, intersection);
+	},
+
+	/**
+	 * Handle intersection cleared.
+	 */
+	onIntersectionCleared: function (evt) {
+		var clearedEls = evt.detail.clearedEls;
+		// Check if the current intersection has ended
+		if (clearedEls.indexOf(this.intersectedEl) === -1) {
+			return;
+		}
+		this.clearCurrentIntersection();
+	},
+
+	setIntersection: function (intersectedEl, intersection) {
+		var handEl = this.el;
+
+		// Already intersecting.
+		if (this.intersectedEl === intersectedEl) {
+			return;
+		}
+
+		// Set new intersection.
+		this.intersection = intersection;
+		this.intersectedEl = intersectedEl;
+
+		// Hovering.
+		handEl.addState(STATES.HOVERING);
+		intersectedEl.addState(STATES.HOVERED);
+		this.twoWayEmit(EVENTS.HANDENTER);
+	},
+
+	clearCurrentIntersection: function () {
+		var handEl = this.el;
+
+		// Nothing to be cleared.
+		if (!this.intersectedEl) {
+			return;
+		}
+
+		// No longer hovering (or holding).
+		this.intersectedEl.removeState(STATES.HOVERED);
+		handEl.removeState(STATES.HOVERING);
+		this.twoWayEmit(EVENTS.HANDLEAVE);
+
+		// Unset intersected entity (after emitting the event).
+		this.intersection = null;
+		this.intersectedEl = null;
+	},
+
+	twoWayEmit: function (evtName) {
+		var el = this.el;
+		var intersectedEl = this.intersectedEl;
+		var intersection = this.intersection;
+
+		this.eventDetail.intersectedEl = intersectedEl;
+		this.eventDetail.intersection = intersection;
+		el.emit(evtName, this.eventDetail);
+
+		if (!intersectedEl) {
+			return;
+		}
+
+		this.intersectedEventDetail.intersection = intersection;
+		intersectedEl.emit(evtName, this.intersectedEventDetail);
+	}
+});
+
+function circularArrayAvg(array) {
+	var avg = 0;
+	array = array.array();
+	for (var i = 0; i < array.length; i++) {
+		avg += array[i];
+	}
+	return avg / array.length;
+}

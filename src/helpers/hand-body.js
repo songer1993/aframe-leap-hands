@@ -1,7 +1,7 @@
 /**
  * CANNON body controller for a single Leap Motion hand.
  */
-function HandBody (el, handComponent) {
+function HandBody(el, handComponent) {
   this.el = el;
   this.handComponent = handComponent;
   this.system = this.el.sceneEl.systems.leap;
@@ -23,7 +23,7 @@ HandBody.prototype.remove = function () {
 
 HandBody.prototype.step = function () {
   var finger, fingerBody,
-      hand = this.handComponent.getHand();
+    hand = this.handComponent.getHand();
 
   if (!hand || !hand.valid) return;
 
@@ -81,11 +81,11 @@ HandBody.prototype.createPalmBody = function () {
  */
 HandBody.prototype.syncPalmBody = (function () {
   var position = new THREE.Vector3(),
-      rotation = new THREE.Quaternion(),
-      hmdRotation = new THREE.Quaternion(),
-      euler = new THREE.Euler(),
-      _tmp1 = new THREE.Vector3(),
-      _tmp2 = new THREE.Vector3();
+    rotation = new THREE.Quaternion(),
+    hmdRotation = new THREE.Quaternion(),
+    euler = new THREE.Euler(),
+    _tmp1 = new THREE.Vector3(),
+    _tmp2 = new THREE.Vector3();
 
   return function (hand, body) {
     rotation.setFromEuler(euler.set(hand.pitch(), hand.yaw(), hand.roll()));

@@ -1,158 +1,322 @@
 var HandMesh = require('../lib/leap.hand-mesh'),
-    CircularArray = require('circular-array'),
-    Intersector = require('./helpers/intersector'),
-    HandBody = require('./helpers/hand-body');
+	CircularArray = require('circular-array'),
+	Intersector = require('./helpers/intersector'),
+	HandBody = require('./helpers/hand-body');
 
 var nextID = 1;
 
+var EVENTS = {
+	CLICK: 'click',
+	HANDPINCH: 'handpinch',
+	HANDGRAB: 'handgrab',
+	HANDHOLD: 'handhold',
+	HANDRELEASE: 'handrelease'
+};
+
+var STATES = {
+	PINCHING: 'hand-pinching',
+	GRABBING: 'hand-grabbing',
+	HOLDING: 'hand-holding',
+};
 /**
  * A-Frame component for a single Leap Motion hand.
  */
 module.exports = AFRAME.registerComponent('leap-hand', {
-  schema: {
-    hand:               {default: '', oneOf: ['left', 'right'], required: true},
-    enablePhysics:      {default: false},
-    holdDistance:       {default: 0.2}, // m
-    holdDebounce:       {default: 100}, // ms
-    holdSelector:       {default: '[holdable]'},
-    holdSensitivity:    {default: 0.95}, // [0,1]
-    releaseSensitivity: {default: 0.75}, // [0,1]
-    showLine:           {default: true},
-    debug:              {default: false}
-  },
+	schema: {
+		hand: {
+			default: '',
+			oneOf: ['left', 'right'],
+			required: true
+		},
+		objects: {
+			default: '*'
+		},
+		enablePhysics: {
+			default: false
+		},
+		pinchDebounce: {
+			default: 100
+		}, // ms
+		pinchSensitivity: {
+			default: 0.95
+		}, // [0,1]
+		grabDebounce: {
+			default: 100
+		}, // ms
+		grabSensitivity: {
+			default: 0.95
+		}, // [0,1]
+		holdDistance: {
+			default: 0.2
+		}, // m
+		holdSensitivity: {
+			default: 0.95
+		}, // [0,1]
+		releaseSensitivity: {
+			default: 0.75
+		}, // [0,1]
+		debug: {
+			default: false
+		}
+	},
 
-  init: function () {
-    this.system = this.el.sceneEl.systems.leap;
+	init: function () {
+		this.system = this.el.sceneEl.systems.leap;
 
-    this.handID = nextID++;
-    this.hand = /** @type {Leap.Hand} */ null;
-    this.handBody = /** @type {HandBody} */ null;
-    this.handMesh = new HandMesh();
+		this.handID = nextID++;
+		this.hand = /** @type {Leap.Hand} */ null;
+		this.handBody = /** @type {HandBody} */ null;
+		this.handMesh = new HandMesh();
 
-    this.isVisible = false;
-    this.isHolding = false;
+		this.isVisible = false;
+		this.isPinching = false;
+		this.isGrabbing = false;
+		this.isHolding = false;
 
-    var bufferLen = Math.floor(this.data.holdDebounce / (1000 / 120));
-    this.grabStrength = 0;
-    this.pinchStrength = 0;
-    this.grabStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(bufferLen);
-    this.pinchStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(bufferLen);
+		var pinchBufferLen = Math.floor(this.data.pinchDebounce / (1000 / 120));
+		var grabBufferLen = Math.floor(this.data.grabDebounce / (1000 / 120));
+		this.grabStrength = 0;
+		this.pinchStrength = 0;
+		this.holdStrength = 0;
+		this.grabStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(grabBufferLen);
+		this.pinchStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(pinchBufferLen);
 
-    this.intersector = new Intersector();
-    this.holdTarget = /** @type {AFRAME.Element} */ null;
+		this.intersector = new Intersector();
+		this.pinchTarget = /** @type {AFRAME.Element} */ null;
+		this.grabTarget = /** @type {AFRAME.Element} */ null;
+		this.holdTarget = /** @type {AFRAME.Element} */ null;
 
-    this.el.setObject3D('mesh', this.handMesh.getMesh());
-    this.handMesh.hide();
+		this.el.setObject3D('mesh', this.handMesh.getMesh());
+		this.handMesh.hide();
 
-    if (this.data.debug) {
-      this.el.object3D.add(this.intersector.getMesh());
-    }
-  },
+		if (this.data.debug) {
+			this.el.object3D.add(this.intersector.getMesh());
+		}
+	},
 
-  update: function () {
-    var data = this.data;
-    if (data.enablePhysics && !this.handBody) {
-      this.handBody = new HandBody(this.el, this);
-    } else if (!data.enablePhysics && this.handBody) {
-      this.handBody.remove();
-      this.handBody = null;
-    }
-  },
+	update: function () {
+		var data = this.data;
+		if (data.enablePhysics && !this.handBody) {
+			this.handBody = new HandBody(this.el, this);
+		} else if (!data.enablePhysics && this.handBody) {
+			this.handBody.remove();
+			this.handBody = null;
+		}
+	},
 
-  remove: function () {
-    if (this.handMesh) {
-      this.el.removeObject3D('mesh');
-      this.handMesh = null;
-    }
-    if (this.handBody) {
-      this.handBody.remove();
-      this.handBody = null;
-    }
-    if (this.intersector.getMesh()) {
-      this.el.object3D.remove(this.intersector.getMesh());
-      this.intersector = null;
-    }
-  },
+	remove: function () {
+		if (this.handMesh) {
+			this.el.removeObject3D('mesh');
+			this.handMesh = null;
+		}
+		if (this.handBody) {
+			this.handBody.remove();
+			this.handBody = null;
+		}
+		if (this.intersector.getMesh()) {
+			this.el.object3D.remove(this.intersector.getMesh());
+			this.intersector = null;
+		}
+	},
 
-  tick: function () {
-    var hand = this.getHand();
+	tick: function () {
+		var hand = this.getHand();
 
-    if (hand && hand.valid) {
-      this.handMesh.scaleTo(hand);
-      this.handMesh.formTo(hand);
-      this.grabStrengthBuffer.push(hand.grabStrength);
-      this.pinchStrengthBuffer.push(hand.pinchStrength);
-      this.grabStrength = circularArrayAvg(this.grabStrengthBuffer);
-      this.pinchStrength = circularArrayAvg(this.pinchStrengthBuffer);
-      var isHolding = Math.max(this.grabStrength, this.pinchStrength)
-        > (this.isHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
-      this.intersector.update(this.data, this.el.object3D, hand, isHolding);
-      if ( isHolding && !this.isHolding) this.hold(hand);
-      if (!isHolding &&  this.isHolding) this.release(hand);
-    } else if (this.isHolding) {
-      this.release(null);
-    }
+		if (hand && hand.valid) {
+			this.handMesh.scaleTo(hand);
+			this.handMesh.formTo(hand);
+			this.grabStrengthBuffer.push(hand.grabStrength);
+			this.pinchStrengthBuffer.push(hand.pinchStrength);
+			this.grabStrength = circularArrayAvg(this.grabStrengthBuffer);
+			this.pinchStrength = circularArrayAvg(this.pinchStrengthBuffer);
+			this.holdStrength = Math.max(this.grabStrength, this.pinchStrength)
 
-    if (hand && !this.isVisible) {
-      this.handMesh.show();
-      this.intersector.show();
-    }
+			var wasPinching = this.isPinching;
+			var wasGrabbing = this.isGrabbing;
+			var wasHolding = this.isHolding;
 
-    if (!hand && this.isVisible) {
-      this.handMesh.hide();
-      this.intersector.hide();
-    }
-    this.isVisible = !!hand;
-  },
+			var isPinching = this.pinchStrength > (wasPinching ? this.data.releaseSensitivity : this.data.pinchSensitivity);
+			var isGrabbing = this.grabStrength > (wasGrabbing ? this.data.releaseSensitivity : this.data.grabSensitivity);
+			var isHolding = this.holdStrength > (wasHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
 
-  getHand: function () {
-    var data = this.data,
-        frame = this.system.getFrame();
-    return frame.hands.length ? frame.hands[frame.hands[0].type === data.hand ? 0 : 1] : null;
-  },
+			// var {
+			// 	isPinching,
+			// 	isGrabbing,
+			// 	isHolding
+			// } = this.getGestures(hand, 20);
+			if (isPinching && !this.wasPinching) this.pinch(hand);
+			if (!isPinching && this.wasPinching) this.release(hand);
 
-  hold: function (hand) {
-    var objects, results,
-        eventDetail = this.getEventDetail(hand);
+			if (isGrabbing && !this.wasGrabbing) this.grab(hand);
+			if (!isGrabbing && this.wasGrabbing) this.release(hand);
 
-    this.el.emit('leap-holdstart', eventDetail);
+			if (isHolding && !this.isHolding) this.hold(hand);
+			if (!isHolding && this.isHolding) this.release(hand);
+			this.intersector.update(this.data, this.el.object3D, hand, isHolding);
+		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
+			this.release(null);
+		}
 
-    objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.holdSelector))
-      .map(function (el) { return el.object3D; });
-    results = this.intersector.intersectObjects(objects, true);
-    this.holdTarget = results[0] && results[0].object && results[0].object.el;
-    if (this.holdTarget) {
-      this.holdTarget.emit('leap-holdstart', eventDetail);
-    }
-    this.isHolding = true;
-  },
+		if (hand && !this.isVisible) {
+			this.handMesh.show();
+			this.intersector.show();
+		}
 
-  release: function (hand) {
-    var eventDetail = this.getEventDetail(hand);
+		if (!hand && this.isVisible) {
+			this.handMesh.hide();
+			this.intersector.hide();
+		}
+		this.isVisible = !!hand;
+	},
 
-    this.el.emit('leap-holdstop', eventDetail);
+	getHand: function () {
+		var data = this.data,
+			frame = this.system.getFrame();
+		return frame.hands.length ? frame.hands[frame.hands[0].type === data.hand ? 0 : 1] : null;
+	},
 
-    if (this.holdTarget) {
-      this.holdTarget.emit('leap-holdstop', eventDetail);
-      this.holdTarget = null;
-    }
-    this.isHolding = false;
-  },
+	getGestures: function (hand, historySamples) {
+		var isPinching;
+		var isGrabbing;
+		var isHolding;
 
-  getEventDetail: function (hand) {
-    return {
-      hand: hand,
-      handID: this.handID,
-      body: this.handBody ? this.handBody.palmBody : null
-    };
-  }
+		if (hand.pinchStrength == 1) isPinching = true;
+		else if (hand.pinchStrength == 0) isPinching = false;
+		else {
+			var sum = 0
+			for (var s = 0; s < historySamples; s++) {
+				var oldHand = this.system.getFrame(s).hand(hand.id)
+				if (!oldHand.valid) break;
+				sum += oldHand.pinchStrength
+			}
+			var avg = sum / s;
+			if (hand.pinchStrength - avg < 0) isPinching = true;
+			else if (hand.pinchStrength > 0) isPinching = false;
+		}
+
+		if (hand.grabStrength == 1) isGrabbing = true;
+		else if (hand.grabStrength == 0) isGrabbing = false;
+		else {
+			var sum = 0
+			for (var s = 0; s < historySamples; s++) {
+				var oldHand = this.system.getFrame(s).hand(hand.id)
+				if (!oldHand.valid) break;
+				sum += oldHand.grabStrength
+			}
+			var avg = sum / s;
+			if (hand.grabStrength - avg < 0) isGrabbing = true;
+			else if (hand.grabStrength > 0) isGrabbing = false;
+		}
+
+		isHolding = isPinching || isGrabbing;
+
+		return {
+			isPinching,
+			isGrabbing,
+			isHolding
+		};
+	},
+
+	pinch: function (hand) {
+		var objects, results,
+			eventDetail = this.getEventDetail(hand);
+
+		this.el.emit(EVENTS.HANDPINCH, eventDetail);
+
+		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
+			.map(function (el) {
+				return el.object3D;
+			});
+		results = this.intersector.intersectObjects(objects, true);
+		this.pinchTarget = results[0] && results[0].object && results[0].object.el;
+		if (this.pinchTarget) {
+			this.pinchTarget.emit(EVENTS.HANDPINCH, eventDetail);
+		}
+		this.isPinching = true;
+		this.el.addState(STATES.PINCHING);
+	},
+
+	grab: function (hand) {
+		var objects, results,
+			eventDetail = this.getEventDetail(hand);
+
+		this.el.emit(EVENTS.HANDGRAB, eventDetail);
+
+		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
+			.map(function (el) {
+				return el.object3D;
+			});
+		results = this.intersector.intersectObjects(objects, true);
+		this.grabTarget = results[0] && results[0].object && results[0].object.el;
+		if (this.grabTarget) {
+			this.grabTarget.emit(EVENTS.HANDGRAB, eventDetail);
+		}
+		this.isGrabbing = true;
+		this.el.addState(STATES.GRABBING);
+	},
+
+
+	hold: function (hand) {
+		var objects, results,
+			eventDetail = this.getEventDetail(hand);
+
+		this.el.emit(EVENTS.HANDHOLD, eventDetail);
+
+		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
+			.map(function (el) {
+				return el.object3D;
+			});
+		results = this.intersector.intersectObjects(objects, true);
+		this.holdTarget = results[0] && results[0].object && results[0].object.el;
+		if (this.holdTarget) {
+			this.holdTarget.emit(EVENTS.HANDHOLD, eventDetail);
+		}
+		this.isHolding = true;
+		this.el.addState(STATES.HOLDING);
+	},
+
+
+	release: function (hand) {
+		var eventDetail = this.getEventDetail(hand);
+
+		this.el.emit(EVENTS.HANDRELEASE, eventDetail);
+
+		if (this.pinchTarget) {
+			this.pinchTarget.emit(EVENTS.HANDRELEASE, eventDetail);
+			this.pinchTarget = null;
+			this.el.removeState(STATES.PINCHING);
+		}
+		this.isPinching = false;
+
+		if (this.grabTarget) {
+			this.grabTarget.emit(EVENTS.HANDRELEASE, eventDetail);
+			this.grabTarget = null;
+			this.el.removeState(STATES.GRABBING);
+		}
+		this.isGrabbing = false;
+
+		if (this.holdTarget) {
+			this.holdTarget.emit(EVENTS.HANDRELEASE, eventDetail);
+			this.holdTarget = null;
+			this.el.removeState(STATES.HOLDING);
+		}
+		this.isHolding = false;
+	},
+
+	getEventDetail: function (hand) {
+		return {
+			hand: hand,
+			handID: this.handID,
+			body: this.handBody ? this.handBody.palmBody : null
+		};
+	}
 });
 
-function circularArrayAvg (array) {
-  var avg = 0;
-  array = array.array();
-  for (var i = 0; i < array.length; i++) {
-    avg += array[i];
-  }
-  return avg / array.length;
+function circularArrayAvg(array) {
+	var avg = 0;
+	array = array.array();
+	for (var i = 0; i < array.length; i++) {
+		avg += array[i];
+	}
+	return avg / array.length;
 }
