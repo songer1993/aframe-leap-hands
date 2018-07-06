@@ -34,27 +34,12 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		enablePhysics: {
 			default: false
 		},
-		pinchDebounce: {
-			default: 100
-		}, // ms
-		pinchSensitivity: {
-			default: 0.95
-		}, // [0,1]
-		grabDebounce: {
-			default: 100
-		}, // ms
-		grabSensitivity: {
-			default: 0.95
-		}, // [0,1]
+		gestureDebounce: {
+			default: 15
+		},
 		holdDistance: {
 			default: 0.2
-		}, // m
-		holdSensitivity: {
-			default: 0.95
-		}, // [0,1]
-		releaseSensitivity: {
-			default: 0.75
-		}, // [0,1]
+		},
 		debug: {
 			default: false
 		}
@@ -72,14 +57,6 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.isPinching = false;
 		this.isGrabbing = false;
 		this.isHolding = false;
-
-		var pinchBufferLen = Math.floor(this.data.pinchDebounce / (1000 / 120));
-		var grabBufferLen = Math.floor(this.data.grabDebounce / (1000 / 120));
-		this.grabStrength = 0;
-		this.pinchStrength = 0;
-		this.holdStrength = 0;
-		this.grabStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(grabBufferLen);
-		this.pinchStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(pinchBufferLen);
 
 		this.intersector = new Intersector();
 		this.pinchTarget = /** @type {AFRAME.Element} */ null;
@@ -125,33 +102,25 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		if (hand && hand.valid) {
 			this.handMesh.scaleTo(hand);
 			this.handMesh.formTo(hand);
-			this.grabStrengthBuffer.push(hand.grabStrength);
-			this.pinchStrengthBuffer.push(hand.pinchStrength);
-			this.grabStrength = circularArrayAvg(this.grabStrengthBuffer);
-			this.pinchStrength = circularArrayAvg(this.pinchStrengthBuffer);
-			this.holdStrength = Math.max(this.grabStrength, this.pinchStrength)
 
 			var wasPinching = this.isPinching;
 			var wasGrabbing = this.isGrabbing;
 			var wasHolding = this.isHolding;
 
-			var isPinching = this.pinchStrength > (wasPinching ? this.data.releaseSensitivity : this.data.pinchSensitivity);
-			var isGrabbing = this.grabStrength > (wasGrabbing ? this.data.releaseSensitivity : this.data.grabSensitivity);
-			var isHolding = this.holdStrength > (wasHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
+			var {
+				isPinching,
+				isGrabbing,
+				isHolding
+			} = this.getGestures(hand, this.data.gestureDebounce);
 
-			// var {
-			// 	isPinching,
-			// 	isGrabbing,
-			// 	isHolding
-			// } = this.getGestures(hand, 20);
-			if (isPinching && !this.wasPinching) this.pinch(hand);
-			if (!isPinching && this.wasPinching) this.release(hand);
+			if (isPinching && !wasPinching) this.pinch(hand);
+			if (!isPinching && wasPinching) this.release(hand);
 
-			if (isGrabbing && !this.wasGrabbing) this.grab(hand);
-			if (!isGrabbing && this.wasGrabbing) this.release(hand);
+			if (isGrabbing && !wasGrabbing) this.grab(hand);
+			if (!isGrabbing && wasGrabbing) this.release(hand);
 
-			if (isHolding && !this.isHolding) this.hold(hand);
-			if (!isHolding && this.isHolding) this.release(hand);
+			if (isHolding && !wasHolding) this.hold(hand);
+			if (!isHolding && wasHolding) this.release(hand);
 			this.intersector.update(this.data, this.el.object3D, hand, isHolding);
 		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
 			this.release(null);
