@@ -13,9 +13,10 @@
 <body>
 	<a-scene>
 		<a-assets>
-			<a-mixin id="hand-cursor" cursor raycaster="showLine:true" position="0 0 0" geometry="primitive: ring;radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
-			  material="color: black; shader: flat; opacity: 0.5" animation="startEvents: click; easing: easeInQuad; property: scale;
-																from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500" super-hands="colliderEvent:raycaster-intersection;
+			<a-mixin id="hand-cursor-ring" position="0 0 0" scale="1 1 1" geometry="primitive: ring;radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
+			  material="color: black; shader: flat; opacity: 0.75" animation="startEvents: click; easing: easeInQuad; property: scale; dir: alternate;
+															from: 1 1 1; to: 0.1 0.1 0.1; dur: 200; loop: 2"></a-mixin>
+			<a-mixin id="hand-cursor" raycaster="showLine: false" super-hands="colliderEvent:raycaster-intersection;
 																colliderEventProperty:els;
 																colliderEndEvent:raycaster-intersection-cleared;
 																colliderEndEventProperty:clearedEls; grabStartButtons: handpinch;
@@ -25,8 +26,9 @@
 																dragDropStartButtons: handpinch;
 																dragDropEndButtons: handrelease" static-body="shape: sphere; sphereRadius: 0.02">
 			</a-mixin>
+			<a-mixin id="left-leap-hand" leap-hand="hand: left; enablePhysics: true; objects: [mixin=interactable]; cursorMixin: hand-cursor; cursorRingMixin: hand-cursor-ring; cursorRingDistance: 0.15"></a-mixin>
+			<a-mixin id="right-leap-hand" leap-hand="hand: right; enablePhysics: true; objects: [mixin=interactable]; cursorMixin: hand-cursor; cursorRingMixin: hand-cursor-ring; cursorRingDistance: 0.15"></a-mixin>
 			<a-mixin id="interactable" hoverable grabbable stretchable draggable dropppable></a-mixin>
-
 			<a-mixin id="log-plane" geometry="width: 5; height: 10" material="color: #111; opacity: 0.5" text="color: lightgreen" clickable></a-mixin>
 			<!-- <a-mixin id="avatar-head" geometry="primitive: box; depth: 0.3; height: 0.3; width: 0.3" material="color: #222"></a-mixin> -->
 			<!-- <a-mixin id="my-firebase" firebase="apiKey: abc; authDomain: mysite.firebaseapp.com; databaseURL: https://mysite.firebaseio.com; storageBucket: mysite.appspot.com"></a-mixin> -->
@@ -41,8 +43,8 @@
 				<!-- <a-entity class="gazecaster"></a-entity> -->
 
 				<!-- leap hands -->
-				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: true; objects: [mixin=interactable]; cursorMixin: hand-cursor; cursorDistance: 0.05"></a-entity>
-				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: true; objects: [mixin=interactable]; cursorMixin: hand-cursor; cursorDistance: 0.05"></a-entity>
+				<a-entity id="left-hand" mixin="left-leap-hand"></a-entity>
+				<a-entity id="right-hand" mixin="right-leap-hand"></a-entity>
 				<!-- <a-entity leap-hand="hand: right; enablePhysics: true; holdDistance: 1; holdDebounce: 100; showLine: true; debug: false; " mixin="super-leap-hand"></a-entity> -->
 			</a-camera>
 
@@ -51,9 +53,12 @@
 		</a-entity>
 
 
-		<a-box id="box1" width="0.25" height="0.25" depth="0.25" position="-0.125 0.01 -0.5" color="red" dynamic-body mixin="interactable"></a-box>
-		<a-box id="box2" width="0.25" height="0.25" depth="0.25" position="0.00 0.4 -0.5" color="green" dynamic-body mixin="interactable"></a-box>
-		<a-box id="box3" width="0.25" height="0.25" depth="0.25" position="0.125 0.01 -0.5" color="blue" dynamic-body mixin="interactable"></a-box>
+		<a-box id="box1" width="0.25" height="0.25" depth="0.25" position="-0.125 0.01 -0.5" color="red" opacity=0.7 dynamic-body
+		  mixin="interactable"></a-box>
+		<a-box id="box2" width="0.25" height="0.25" depth="0.25" position="0.00 0.4 -0.5" color="green" opacity=0.7 dynamic-body
+		  mixin="interactable"></a-box>
+		<a-box id="box3" width="0.25" height="0.25" depth="0.25" position="0.125 0.01 -0.5" color="blue" opacity=0.7 dynamic-body
+		  mixin="interactable"></a-box>
 
 		<!-- Terrain -->
 		<a-grid static-body></a-grid>
@@ -67,9 +72,12 @@
 		var box1 = document.querySelector('#box1');
 		var box2 = document.querySelector('#box2');
 		var box3 = document.querySelector('#box3');
-
 		var rightHand = document.querySelector("#right-hand");
 		var leftHand = document.querySelector("#left-hand");
+
+		box1.addEventListener('click', () => {
+			box1.setAttribute('material', 'color', 'yellow');
+		});
 		// rightHand.setAttribute('super-hands',
 		// 	"colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: handopen; stretchStartButtons: handpinch; stretchEndButtons: handopen; dragDropStartButtons: handpinch; dragDropEndButtons: handopen"
 		// )

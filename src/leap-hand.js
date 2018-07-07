@@ -1,6 +1,6 @@
 const HandMesh = require('../lib/leap.hand-mesh'),
 	CircularArray = require('circular-array'),
-	Intersector = require('./helpers/intersector'),
+	HandCursor = require('./helpers/hand-cursor'),
 	HandBody = require('./helpers/hand-body');
 
 let nextID = 1;
@@ -61,7 +61,10 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		cursorMixin: {
 			default: ''
 		},
-		cursorDistance: {
+		cursorRingMixin: {
+			default: ''
+		},
+		cursorRingDistance: {
 			default: 0.05
 		},
 		debug: {
@@ -90,7 +93,6 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.grabStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(grabBufferLen);
 		this.pinchStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(pinchBufferLen);
 
-		this.intersector = new Intersector();
 		this.pinchTarget = /** @type {AFRAME.Element} */ null;
 		this.grabTarget = /** @type {AFRAME.Element} */ null;
 		this.holdTarget = /** @type {AFRAME.Element} */ null;
@@ -98,34 +100,10 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.el.setObject3D('mesh', this.handMesh.getMesh());
 		this.handMesh.hide();
 
-		if (this.data.debug) {
-			this.el.object3D.add(this.intersector.getMesh());
-		}
-
-		const cursorEl = document.createElement('a-entity');
-		if (this.data.cursorMixin) {
-			cursorEl.setAttribute('mixin', this.data.cursorMixin);
-		} else {
-			const assets = this.el.sceneEl.querySelector('a-assets') || this.el.sceneEl.appendChild(document.createElement('a-assets'));
-			const cursorDefault = document.createElement('a-mixin');
-			cursorDefault.setAttribute('id', handCursorDefualtId);
-			cursorDefault.setAttribute('raycaster', 'showLine', true);
-			cursorDefault.setAttribute('super-hands', 'colliderEvent', 'raycaster-intersection');
-			cursorDefault.setAttribute('super-hands', 'colliderEventProperty', 'els');
-			cursorDefault.setAttribute('super-hands', 'colliderEndEvent', 'raycaster-intersection-cleared');
-			cursorDefault.setAttribute('super-hands', 'colliderEndEventProperty', 'clearedEls');
-			cursorDefault.setAttribute('super-hands', 'grabStartButtons', 'handpinch');
-			cursorDefault.setAttribute('super-hands', 'grabEndButtons', 'handrelease');
-			cursorDefault.setAttribute('super-hands', 'stretchStartButtons', 'handpinch');
-			cursorDefault.setAttribute('super-hands', 'stretchEndButtons', 'handrelease');
-			cursorDefault.setAttribute('super-hands', 'dragDropStartButtons', 'handpinch');
-			cursorDefault.setAttribute('super-hands', 'dragDropEndButtons', 'handrealse');
-			cursorDefault.setAttribute('static-body', 'shape: sphere; sphereRadius: 0.02');
-			assets.appendChild(cursorDefault);
-			cursorEl.setAttribute('mixin', handCursorDefualtId);
-		}
-		this.cursorEl = cursorEl;
-		this.el.appendChild(this.cursorEl);
+		this.cursor = new HandCursor(this.data.cursorMixin, this.data.cursorRingMixin);
+		this.el.appendChild(this.cursor.el);
+		this.el.appendChild(this.cursor.ringEl);
+		this.cursor.hide();
 	},
 
 	update: function () {
@@ -147,11 +125,9 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.handBody.remove();
 			this.handBody = null;
 		}
-		if (this.intersector.getMesh()) {
-			this.el.object3D.remove(this.intersector.getMesh());
-			this.intersector = null;
-		}
-		this.el.removeChild(this.cursorEl);
+		this.el.removeChild(this.cursor.el);
+		this.el.removeChild(this.cursor.ringEl);
+		this.cursor = null;
 	},
 
 	tick: function () {
@@ -182,22 +158,20 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 
 			if (isHolding && !this.isHolding) this.hold(hand);
 			if (!isHolding && this.isHolding) this.release(hand);
-			this.intersector.update(this.data, this.el.object3D, hand, isHolding);
-			this.updateHandRaycaster(hand);
+
+			this.cursor.update(this.data, hand, isHolding);
 		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
 			this.release(null);
 		}
 
 		if (hand && !this.isVisible) {
 			this.handMesh.show();
-			this.intersector.show();
-			this.cursorEl.setAttribute('visible', true);
+			this.cursor.show();
 		}
 
 		if (!hand && this.isVisible) {
 			this.handMesh.hide();
-			this.intersector.hide();
-			this.cursorEl.setAttribute('visible', false);
+			this.cursor.hide();
 		}
 		this.isVisible = !!hand;
 	},
@@ -208,24 +182,6 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		return frame.hands.length ? frame.hands[frame.hands[0].type === data.hand ? 0 : 1] : null;
 	},
 
-	updateHandRaycaster: function (hand) {
-		const origin = new THREE.Vector3();
-		const palmNormal = new THREE.Vector3();
-		const direction = new THREE.Vector3();
-		const position = new THREE.Vector3();
-		const distance = new THREE.Vector3();
-
-		origin.fromArray(hand.palmPosition);
-		palmNormal.fromArray(hand.palmNormal);
-		direction.fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
-		distance.copy(direction).multiplyScalar(this.data.cursorDistance);
-		position.copy(origin).add(distance);
-
-		const cursor = this.cursorEl;
-		cursor.object3D.position.set(position.x, position.y, position.z);
-		cursor.object3D.lookAt(origin);
-		cursor.setAttribute('raycaster', 'direction', direction);
-	},
 
 	pinch: function (hand) {
 		let {
@@ -236,13 +192,13 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 
 
 		this.el.emit(EVENTS.HANDPINCH, eventDetail);
-		this.cursorEl.emit(EVENTS.HANDPINCH, eventDetail);
+		this.cursor.el.emit(EVENTS.HANDPINCH, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
 			.map(function (el) {
 				return el.object3D;
 			});
-		results = this.intersector.intersectObjects(objects, true);
+		results = this.cursor.intersectObjects(objects, true);
 		this.pinchTarget = results[0] && results[0].object && results[0].object.el;
 		if (this.pinchTarget) {
 			this.pinchTarget.emit(EVENTS.HANDPINCH, eventDetail);
@@ -259,13 +215,13 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		} = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDGRAB, eventDetail);
-		this.cursorEl.emit(EVENTS.HANDGRAB, eventDetail);
+		this.cursor.el.emit(EVENTS.HANDGRAB, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
 			.map(function (el) {
 				return el.object3D;
 			});
-		results = this.intersector.intersectObjects(objects, true);
+		results = this.cursor.intersectObjects(objects, true);
 		this.grabTarget = results[0] && results[0].object && results[0].object.el;
 		if (this.grabTarget) {
 			this.grabTarget.emit(EVENTS.HANDGRAB, eventDetail);
@@ -283,13 +239,13 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		} = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDHOLD, eventDetail);
-		this.cursorEl.emit(EVENTS.HANDHOLD, eventDetail);
+		this.cursor.el.emit(EVENTS.HANDHOLD, eventDetail);
 
 		objects = [].slice.call(this.el.sceneEl.querySelectorAll(this.data.objects))
 			.map(function (el) {
 				return el.object3D;
 			});
-		results = this.intersector.intersectObjects(objects, true);
+		results = this.cursor.intersectObjects(objects, true);
 		this.holdTarget = results[0] && results[0].object && results[0].object.el;
 		if (this.holdTarget) {
 			this.holdTarget.emit(EVENTS.HANDHOLD, eventDetail);
@@ -303,10 +259,15 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		const eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDRELEASE, eventDetail);
-		this.cursorEl.emit(EVENTS.HANDRELEASE, eventDetail);
+		this.cursor.el.emit(EVENTS.HANDRELEASE, eventDetail);
+
+		this.el.emit(EVENTS.CLICK, eventDetail);
+		this.cursor.el.emit(EVENTS.CLICK, eventDetail);
+		this.cursor.ringEl.emit(EVENTS.CLICK, eventDetail);
 
 		if (this.pinchTarget) {
 			this.pinchTarget.emit(EVENTS.HANDRELEASE, eventDetail);
+			// this.pinchTarget.emit(EVENTS.CLICK, eventDetail);
 			this.pinchTarget = null;
 			this.el.removeState(STATES.PINCHING);
 		}
