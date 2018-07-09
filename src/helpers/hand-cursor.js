@@ -1,7 +1,3 @@
-/**
- * Helper for raycasting, which chooses a raycaster direction based on hand position. Also supports
- * a debugging mode, in which the ray is visible.
- */
 function HandCursor(cursorMixin, cursorRingMixin) {
   const cursorEl = document.createElement('a-entity');
   cursorEl.setAttribute('mixin', cursorMixin);

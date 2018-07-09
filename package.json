@@ -32,8 +32,8 @@
   "homepage": "https://github.com/donmccurdy/aframe-leap-hands#readme",
   "dependencies": {
     "aframe": "~0.8.2",
-    "aframe-physics-system": "~3.1.2",
     "aframe-animation-component": "~5.0.0",
+    "aframe-physics-system": "~3.1.2",
     "circular-array": "0.0.1",
     "leapjs": "^0.6.4",
     "super-hands": "~2.1.0"

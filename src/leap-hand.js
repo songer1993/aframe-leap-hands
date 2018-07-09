@@ -1,6 +1,7 @@
 const HandMesh = require('../lib/leap.hand-mesh'),
 	CircularArray = require('circular-array'),
 	HandCursor = require('./helpers/hand-cursor'),
+	HandFinger = require('./helpers/hand-finger'),
 	HandBody = require('./helpers/hand-body');
 
 let nextID = 1;
@@ -58,6 +59,9 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		releaseSensitivity: {
 			default: 0.75
 		}, // [0,1]
+		fingerMixin: {
+			default: ''
+		},
 		cursorMixin: {
 			default: ''
 		},
@@ -104,6 +108,14 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.el.appendChild(this.cursor.el);
 		this.el.appendChild(this.cursor.ringEl);
 		this.cursor.hide();
+
+		this.fingers = [];
+		for (let i = 0; i < 5; i++) {
+			let finger = new HandFinger(this.data.fingerMixin);
+			this.fingers.push(finger);
+			this.el.appendChild(this.fingers[i].el);
+			this.fingers[i].hide();
+		}
 	},
 
 	update: function () {
@@ -128,6 +140,11 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.el.removeChild(this.cursor.el);
 		this.el.removeChild(this.cursor.ringEl);
 		this.cursor = null;
+
+		for (let i = 0; i < 5; i++) {
+			this.el.removeChild(this.fingers[i].el);
+			this.fingers[i] = null;
+		}
 	},
 
 	tick: function () {
@@ -160,6 +177,10 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			if (!isHolding && this.isHolding) this.release(hand);
 
 			this.cursor.update(this.data, hand, isHolding);
+			for (let i = 0; i < 5; i++) {
+				let type = hand.fingers[i].type;
+				this.fingers[type].update(this.data, hand, i, isHolding);
+			}
 		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
 			this.release(null);
 		}
@@ -167,11 +188,17 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		if (hand && !this.isVisible) {
 			this.handMesh.show();
 			this.cursor.show();
+			for (let i = 0; i < 5; i++) {
+				this.fingers[i].show();
+			}
 		}
 
 		if (!hand && this.isVisible) {
 			this.handMesh.hide();
 			this.cursor.hide();
+			for (let i = 0; i < 5; i++) {
+				this.fingers[i].hide();
+			}
 		}
 		this.isVisible = !!hand;
 	},
