@@ -11,10 +11,12 @@ const EVENTS = {
 	HANDPINCH: 'handpinch',
 	HANDGRAB: 'handgrab',
 	HANDHOLD: 'handhold',
-	HANDRELEASE: 'handrelease'
+	HANDRELEASE: 'handrelease',
+	HANDOPEN: 'handopen'
 };
 
 const STATES = {
+	OPENING: 'hand-opening',
 	PINCHING: 'hand-pinching',
 	GRABBING: 'hand-grabbing',
 	HOLDING: 'hand-holding',
@@ -48,6 +50,12 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			default: 100
 		}, // ms
 		grabSensitivity: {
+			default: 0.95
+		}, // [0,1]
+		openDebounce: {
+			default: 100
+		}, // ms
+		openSensitivity: {
 			default: 0.95
 		}, // [0,1]
 		holdDistance: {
@@ -162,24 +170,30 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.pinchStrengthBuffer.push(hand.pinchStrength);
 			this.grabStrength = circularArrayAvg(this.grabStrengthBuffer);
 			this.pinchStrength = circularArrayAvg(this.pinchStrengthBuffer);
-			this.holdStrength = Math.max(this.grabStrength, this.pinchStrength)
+			this.holdStrength = Math.max(this.grabStrength, this.pinchStrength);
+			this.openStrength = 1 - this.holdStrength;
 
 			const wasPinching = this.isPinching;
 			const wasGrabbing = this.isGrabbing;
 			const wasHolding = this.isHolding;
+			const wasOpening = this.isOpening;
 
 			const isPinching = this.pinchStrength > (wasPinching ? this.data.releaseSensitivity : this.data.pinchSensitivity);
 			const isGrabbing = this.grabStrength > (wasGrabbing ? this.data.releaseSensitivity : this.data.grabSensitivity);
 			const isHolding = this.holdStrength > (wasHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
+			const isOpening = this.openStrength > (wasOpening ? this.data.releaseSensitivity : this.data.openSensitivity);
 
-			if (isPinching && !this.wasPinching) this.pinch(hand);
-			if (!isPinching && this.wasPinching) this.release(hand);
+			if (isPinching && !wasPinching) this.pinch(hand);
+			if (!isPinching && wasPinching) this.release(hand);
 
-			if (isGrabbing && !this.wasGrabbing) this.grab(hand);
-			if (!isGrabbing && this.wasGrabbing) this.release(hand);
+			if (isGrabbing && !wasGrabbing) this.grab(hand);
+			if (!isGrabbing && wasGrabbing) this.release(hand);
 
-			if (isHolding && !this.isHolding) this.hold(hand);
-			if (!isHolding && this.isHolding) this.release(hand);
+			if (isHolding && !wasHolding) this.hold(hand);
+			if (!isHolding && wasHolding) this.release(hand);
+
+			if (isOpening && !wasOpening) this.open(hand);
+			if (!isOpening && wasOpening) this.release(hand);
 
 			this.cursor.update(this.data, hand, isHolding);
 			this.finger.update(this.data, this.getFinger(hand, 1), isHolding);
@@ -273,6 +287,18 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.el.addState(STATES.GRABBING);
 	},
 
+	open: function (hand) {
+		let {
+			objects,
+			results,
+			eventDetail
+		} = this.getEventDetail(hand);
+
+		this.el.emit(EVENTS.HANDOPEN, eventDetail);
+
+		this.isOpening = true;
+		this.el.addState(STATES.OPENING);
+	},
 
 	hold: function (hand) {
 		let {
@@ -329,6 +355,11 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.el.removeState(STATES.HOLDING);
 		}
 		this.isHolding = false;
+
+		if (this.isOpening) {
+			this.el.removeState(STATES.OPENING);
+		}
+		this.isOpening = false;
 	},
 
 	getEventDetail: function (hand) {
