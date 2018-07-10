@@ -35,6 +35,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			required: true
 		},
 		objects: {
+			type: 'selector',
 			default: '[grabbable]'
 		},
 		enablePhysics: {
@@ -67,17 +68,11 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		releaseSensitivity: {
 			default: 0.75
 		}, // [0,1]
-		fingerMixin: {
-			default: ''
+		palmTool: {
+			type: 'selector'
 		},
-		cursorMixin: {
-			default: ''
-		},
-		cursorRingMixin: {
-			default: ''
-		},
-		cursorRingDistance: {
-			default: 0.05
+		fingerTool: {
+			type: 'selector'
 		},
 		debug: {
 			default: false
@@ -110,23 +105,16 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.holdTarget = /** @type {AFRAME.Element} */ null;
 
 		this.el.setObject3D('mesh', this.handMesh.getMesh());
-		this.handMesh.hide();
+		this.el.setAttribute('visible', false);
+		// this.handMesh.hide();
 
-		this.cursor = new HandCursor(this.data.cursorMixin, this.data.cursorRingMixin);
-		this.el.appendChild(this.cursor.el);
-		this.el.appendChild(this.cursor.ringEl);
-		this.cursor.hide();
+		this.palmTool = this.data.palmTool;
+		this.el.appendChild(this.palmTool);
+		this.palmTool.setAttribute('visible', false);
 
-		this.finger = new HandFinger(this.data.fingerMixin);
-		this.el.appendChild(this.finger.el);
-		this.finger.hide();
-		// this.fingers = [];
-		// for (let i = 0; i < 5; i++) {
-		// 	let finger = new HandFinger(this.data.fingerMixin);
-		// 	this.fingers.push(finger);
-		// 	this.el.appendChild(this.fingers[i].el);
-		// 	this.fingers[i].hide();
-		// }
+		this.fingerTool = this.data.fingerTool;
+		this.el.appendChild(this.fingerTool);
+		this.fingerTool.setAttribute('visible', false);
 	},
 
 	update: function () {
@@ -148,16 +136,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.handBody.remove();
 			this.handBody = null;
 		}
-		this.el.removeChild(this.cursor.el);
-		this.el.removeChild(this.cursor.ringEl);
-		this.cursor = null;
-
-		this.el.removeChild(this.finger.el);
-		this.finger = null;
-		// for (let i = 0; i < 5; i++) {
-		// 	this.el.removeChild(this.fingers[i].el);
-		// 	this.fingers[i] = null;
-		// }
+		this.el.removeChild(this.palmTool);
+		this.el.removeChild(this.fingerTool);
 	},
 
 	tick: function () {
@@ -194,14 +174,6 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 
 			if (isOpening && !wasOpening) this.open(hand);
 			if (!isOpening && wasOpening) this.release(hand);
-
-			this.cursor.update(this.data, hand, isHolding);
-			this.finger.update(this.data, this.getFinger(hand, 1), isHolding);
-
-			// for (let i = 0; i < 5; i++) {
-			// 	let type = hand.fingers[i].type;
-			// 	this.fingers[type].update(this.data, hand, i, isHolding);
-			// }
 		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
 			this.release(null);
 		}
