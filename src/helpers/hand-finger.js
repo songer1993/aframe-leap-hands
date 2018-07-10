@@ -4,9 +4,9 @@ function HandFinger(fingerMixin) {
   this.el = fingerEl;
 }
 
-HandFinger.prototype.update = function (options, hand, id, isHolding) {
+HandFinger.prototype.update = function (options, finger, isHolding) {
   const position = new THREE.Vector3();
-  position.fromArray(hand.fingers[id].tipPosition);
+  position.fromArray(finger.tipPosition);
   this.el.object3D.position.set(position.x, position.y, position.z);
 };
 
