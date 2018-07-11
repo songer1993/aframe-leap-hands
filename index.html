@@ -14,9 +14,13 @@
 		<a-assets>
 			<!-- hand cursor ring -->
 			<a-mixin id="hand-cursor-ring" position="0 0 0" scale="1 1 1" geometry="primitive: ring;radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
-			  material="color: black; shader: flat; opacity: 0.75" animation="startEvents: click; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 3 3 3; dur: 500; loop: 2"></a-mixin>
+			  material="color: black; shader: flat; opacity: 0.75" animation="startEvents: click; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 5 5 5; dur: 500; loop: 2"></a-mixin>
 			<!-- hand cursor -->
-			<a-mixin id="hand-cursor" raycaster="showLine: true" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: handrelease; stretchStartButtons: handpinch; stretchEndButtons: handrelease; dragDropStartButtons: handpinch; dragDropEndButtons: handrelease"
+			<a-mixin id="hand-cursor" raycaster="showLine: true" super-hands__grab="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
+			  super-hands__tap="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: fingertap;"
+			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
+			<!-- finger cursor -->
+			<a-mixin id="finger-cursor" raycaster="showLine: true" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: release; stretchStartButtons: fingertap; stretchEndButtons: release; dragDropStartButtons: fingertap; dragDropEndButtons: release"
 			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
 			<!-- hand finger -->
 			<a-mixin id="hand-finger" geometry="primitive: sphere; radius: 0.02" material="color: blue; opacity: 0.75" physics-collider
@@ -38,8 +42,9 @@
 			<!-- camera setting -->
 			<a-camera near=0.01 fov=110 position="0 0 0">
 				<!-- leap hands -->
-				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: false; fingerWearables: #finger-ball;">
+				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: false; palmWearables: null; fingerWearables: #finger-ball;">
 					<a-entity id="finger-ball" mixin="hand-finger" leap-wearable="finger: true; fingerId: 1"></a-entity>
+					<!-- <a-entity id="finger-clicker" mixin="finger-cursor" leap-wearable></a-entity> -->
 				</a-entity>
 				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: false; palmWearables: #palm-raycaster, #palm-ring;">
 					<a-entity id="palm-raycaster" mixin="hand-cursor" leap-wearable></a-entity>
@@ -49,9 +54,9 @@
 		</a-entity>
 
 
-		<a-entity id="box1" mixin="cube" position="-0.125 0.1 -0.5" material="color: red"></a-entity>
-		<a-entity id="box2" mixin="cube" position="0.00 0.4 -0.5" material="color: green"></a-entity>
-		<a-entity id="box3" mixin="cube" position="0.125 0.1 -0.5" material="color: blue"></a-entity>
+		<a-entity id="box1" mixin="cube" position="-0.125 0.1 -1" material="color: red"></a-entity>
+		<a-entity id="box2" mixin="cube" position="0.00 0.4 -1" material="color: green"></a-entity>
+		<a-entity id="box3" mixin="cube" position="0.125 0.1 -1" material="color: blue"></a-entity>
 
 		<!-- Terrain -->
 		<a-grid static-body></a-grid>
@@ -70,6 +75,14 @@
 
 		box1.addEventListener('click', () => {
 			box1.setAttribute('material', 'color', getRandomColor());
+		});
+
+		box2.addEventListener('click', () => {
+			box2.setAttribute('material', 'color', getRandomColor());
+		});
+
+		box3.addEventListener('click', () => {
+			box3.setAttribute('material', 'color', getRandomColor());
 		});
 
 		rightHand.addEventListener('grab-start', (e) => {
