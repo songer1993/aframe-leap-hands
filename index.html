@@ -14,7 +14,7 @@
 		<a-assets>
 			<!-- hand cursor ring -->
 			<a-mixin id="hand-cursor-ring" position="0 0 0" scale="1 1 1" geometry="primitive: ring;radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
-			  material="color: black; shader: flat; opacity: 0.75" animation="startEvents: click; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 0.1 0.1 0.1; dur: 200; loop: 2"></a-mixin>
+			  material="color: black; shader: flat; opacity: 0.75" animation="startEvents: click; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 3 3 3; dur: 500; loop: 2"></a-mixin>
 			<!-- hand cursor -->
 			<a-mixin id="hand-cursor" raycaster="showLine: true" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: handrelease; stretchStartButtons: handpinch; stretchEndButtons: handrelease; dragDropStartButtons: handpinch; dragDropEndButtons: handrelease"
 			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
@@ -26,9 +26,9 @@
 			<a-mixin id="cube" geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25" material="opacity: 0.75" dynamic-body
 			  grabbable sleepy collision-filter="group: cube; collidesWith: default, hands"></a-mixin>
 			<!-- left hand -->
-			<a-mixin id="left-leap-hand" leap-hand="hand: left; enablePhysics: false; objects: [mixin=cube]; cursorMixin: hand-cursor; cursorRingMixin: hand-cursor-ring; cursorRingDistance: 0.15"></a-mixin>
+			<!-- <a-mixin id="left-leap-hand" leap-hand="hand: left; enablePhysics: false; objects: [mixin=cube]; cursorMixin: hand-cursor; cursorRingMixin: hand-cursor-ring; cursorRingDistance: 0.15"></a-mixin> -->
 			<!-- right hand -->
-			<a-mixin id="right-leap-hand" leap-hand="hand: right; enablePhysics: false; objects: [mixin=cube]; fingerMixin: hand-finger; cursorMixin: hand-cursor; cursorRingMixin: hand-cursor-ring; cursorRingDistance: 0.15"></a-mixin>
+			<!-- <a-mixin id="right-leap-hand" leap-hand="hand: right; enablePhysics: false; objects: [mixin=cube]; fingerMixin: hand-finger; cursorMixin: hand-cursor; cursorRingMixin: hand-cursor-ring; cursorRingDistance: 0.15"></a-mixin> -->
 			<!-- interactable -->
 			<a-mixin id="interactable" hoverable grabbable stretchable draggable dropppable></a-mixin>
 		</a-assets>
@@ -38,8 +38,13 @@
 			<!-- camera setting -->
 			<a-camera near=0.01 fov=110 position="0 0 0">
 				<!-- leap hands -->
-				<a-entity id="left-hand" mixin="left-leap-hand"></a-entity>
-				<a-entity id="right-hand" mixin="right-leap-hand"></a-entity>
+				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: false; fingerWearables: #finger-ball;">
+					<a-entity id="finger-ball" mixin="hand-finger" leap-wearable="finger: true; fingerId: 1"></a-entity>
+				</a-entity>
+				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: false; palmWearables: #palm-raycaster, #palm-ring;">
+					<a-entity id="palm-raycaster" mixin="hand-cursor" leap-wearable></a-entity>
+					<a-entity id="palm-ring" mixin="hand-cursor-ring" leap-wearable="distance: 0.15"></a-entity>
+				</a-entity>
 			</a-camera>
 		</a-entity>
 
