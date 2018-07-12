@@ -13,21 +13,21 @@
 	<a-scene physics="gravity: 0">
 		<a-assets>
 			<!-- hand cursor ring -->
-			<a-mixin id="hand-cursor-ring" position="0 0 0" scale="1 1 1" geometry="primitive: ring;radiusOuter: 0.008; radiusInner: 0.005; segmentsTheta: 32"
-			  material="color: black; shader: flat; opacity: 0.75" animation="startEvents: click; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 5 5 5; dur: 500; loop: 2"></a-mixin>
+			<a-mixin id="hand-cursor-ring" position="0 0 0" scale="1 1 1" geometry="primitive: ring;radiusOuter: 0.08; radiusInner: 0.05; segmentsTheta: 32"
+			  material="color: black; shader: flat; opacity: 0.95" clickable animation="startEvents: click; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 5 5 5; dur: 500; loop: 2"></a-mixin>
 			<!-- hand cursor -->
-			<a-mixin id="hand-cursor" raycaster="showLine: true; objects: [mixin=cube]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
+			<a-mixin id="hand-cursor" raycaster="showLine: true; objects: [grabbable], [clickable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
 			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
 			<!-- finger clicker -->
-			<a-mixin id="finger-clicker" raycaster="showLine: false; objects: [mixin=cube]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: fingertap;"
+			<a-mixin id="finger-clicker" raycaster="showLine: false; objects: [grabbable], [clickable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: fingertap;"
 			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
 			<!-- hand finger -->
 			<a-mixin id="finger-tip" geometry="primitive: sphere; radius: 0.02" material="color: blue; opacity: 0.75" physics-collider
 			  static-body="shape: sphere; sphereRadius: 0.02" super-hands="colliderEvent: collisions; colliderEventProperty: els; colliderEndEvent: collisions; colliderEndEventProperty: clearedEls; grabStartButtons: collisions; grabEndButtons: collisions"
 			  collision-filter="group: hands; collidesWith: cube; collisionForces: false"></a-mixin>
 			<!-- cube -->
-			<a-mixin id="cube" geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25" material="opacity: 0.75" dynamic-body
-			  grabbable sleepy collision-filter="group: cube; collidesWith: default, hands"></a-mixin>
+			<a-mixin id="cube" geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25" material="opacity: 1" dynamic-body grabbable
+			  sleepy collision-filter="group: cube; collidesWith: default, hands"></a-mixin>
 
 			<a-mixin id="interactable" hoverable grabbable stretchable draggable dropppable></a-mixin>
 		</a-assets>
@@ -39,21 +39,21 @@
 				<!-- leap hands -->
 				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: false; palmWearables: #palm-box; fingerWearables: null;">
 					<a-entity id="palm-box" geometry="primitive: box; width: 0.05; height: 0.05; depth: 0.05" material="opacity: 0.75; color: red"
-					  static-body grabbable sleepy collision-filter="group: cube; collidesWith: default, hands" leap-wearable="distance:0.05"></a-entity>
+					  static-body grabbable sleepy collision-filter="group: cube; collidesWith: default, hands" leap-wearable="holdDistance:0.05"></a-entity>
 				</a-entity>
 				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: false; palmWearables: #palm-raycaster, #palm-ring, #index-finger-clicker; fingerWearables: #index-finger-tip">
-					<a-entity id="index-finger-clicker" mixin="finger-clicker" leap-wearable=""></a-entity>
-					<a-entity id="palm-raycaster" mixin="hand-cursor" leap-wearable=""></a-entity>
-					<a-entity id="palm-ring" mixin="hand-cursor-ring" leap-wearable="distance: 0.15"></a-entity>
-					<a-entity id="index-finger-tip" mixin="finger-tip" leap-wearable="finger: true; fingerId: 1"></a-entity>
+					<a-entity id="index-finger-clicker" mixin="finger-clicker" leap-wearable="raycaster: #palm-raycaster"></a-entity>
+					<a-entity id="palm-raycaster" mixin="hand-cursor" leap-wearable></a-entity>
+					<a-entity id="palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-raycaster; holdDistance: 0.15;"></a-entity>
+					<a-entity id="index-finger-tip" mixin="finger-tip" leap-wearable="raycaster: #palm-raycaster; finger: true; fingerId: 1"></a-entity>
 				</a-entity>
 			</a-camera>
 		</a-entity>
 
 
-		<a-entity id="box1" mixin="cube" position="-0.125 0.1 -1" material="color: red"></a-entity>
-		<a-entity id="box2" mixin="cube" position="0.00 0.4 -1" material="color: green"></a-entity>
-		<a-entity id="box3" mixin="cube" position="0.125 0.1 -1" material="color: blue"></a-entity>
+		<a-entity id="box1" mixin="cube" position="-1 0.3 -1" material="color: red"></a-entity>
+		<a-entity id="box2" mixin="cube" position="0.00 0.6 -1" material="color: green"></a-entity>
+		<a-entity id="box3" mixin="cube" position="0.125 0.3 -1" material="color: blue"></a-entity>
 
 		<!-- Terrain -->
 		<a-grid static-body></a-grid>
@@ -92,9 +92,9 @@
 
 
 		box1.addEventListener('click', (e) => {
-			if (checkClickEvent(e)) {
-				box1.setAttribute('material', 'color', getRandomColor());
-			}
+			// if (checkClickEvent(e)) {
+			box1.setAttribute('material', 'color', getRandomColor());
+			// }
 		});
 
 		box2.addEventListener('click', () => {
