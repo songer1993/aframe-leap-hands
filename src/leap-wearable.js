@@ -137,15 +137,9 @@ module.exports = AFRAME.registerComponent('leap-wearable', {
       } else {
         if (this.raycasterEl) {
           const raycaster = this.raycasterEl.components['raycaster'];
-          // raycaster.checkIntersections();
-          if (this.data.crawling && this.intersection) {
-
-            const intersection = this.getNearestIntersection(raycaster.intersections);
-            // if (this.el.id === "palm-ring") {
-            //   console.log('crawling');
-            //   console.log(intersection);
-            // };
-            const worldPalmPosition = new THREE.Vector3().fromArray(hand.palmPosition).sub(this.handEl.object3D.position).add(this.handEl.object3D.getWorldPosition());
+          raycaster.checkIntersections();
+          const intersection = this.getNearestIntersection(raycaster.intersections);
+          if (this.data.crawling && intersection) {
             const worldToLocalMat = new THREE.Matrix4().getInverse(this.handEl.object3D.matrixWorld);
             const worldPoint = intersection.point.clone();
             const worldNormal = intersection.face.normal.clone().normalize();
@@ -154,9 +148,6 @@ module.exports = AFRAME.registerComponent('leap-wearable', {
             const position = new THREE.Vector3().addVectors(worldPoint, worldNormal.multiplyScalar(this.data.crawlingDistance)).applyMatrix4(worldToLocalMat);
             this.el.object3D.position.set(position.x, position.y, position.z);
           } else {
-            // if (this.el.id === "palm-ring") {
-            //   console.log('following')
-            // };
             const origin = new THREE.Vector3().fromArray(hand.palmPosition);
             const palmNormal = new THREE.Vector3().fromArray(hand.palmNormal);;
             const direction = new THREE.Vector3().fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
