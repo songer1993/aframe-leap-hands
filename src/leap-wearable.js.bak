@@ -1,0 +1,150 @@
+module.exports = AFRAME.registerComponent('leap-wearable', {
+  schema: {
+    hand: {
+      type: 'selector',
+    },
+    finger: {
+      type: 'boolean',
+      default: false
+    },
+    fingerId: {
+      type: 'number',
+      default: 1,
+      oneOf: [0, 1, 2, 3, 4]
+    },
+    distance: {
+      type: 'number',
+      default: 0
+    },
+    lookAtOrigin: {
+      type: 'boolean',
+      default: true
+    },
+    raycaster: {
+      type: 'selector'
+    },
+    crawling: {
+      type: 'boolean',
+      default: false
+    }
+  },
+
+  init: function () {
+    if (this.data.hand) {
+      this.handEl = this.data.hand;
+    } else {
+      this.handEl = this.el.parentNode;
+    }
+    // this.addEventListeners(this)
+    this.intersection = null;
+  },
+
+  addEventListeners: function (self) {
+    const raycasterEl = self.data.raycaster;
+    raycasterEl.addEventListener('raycaster-intersection', (e) => {
+      self.onIntersection(e, self)
+    });
+    raycasterEl.addEventListener('raycaster-intersection-cleared', (e) => {
+      self.onIntersectionCleared(e, self)
+    });
+  },
+
+  removeEventListeners: function (self) {
+    const raycasterEl = self.data.raycaster;
+    raycasterEl.removeEventListener('raycaster-intersection', (e) => {
+      self.onIntersection(e, self)
+    });
+    raycasterEl.removeEventListener('raycaster-intersection-cleared', (e) => {
+      self.onIntersectionCleared(e, self)
+    });
+  },
+
+  onIntersection: function (e, self) {
+    console.log('onintersection');
+    self.intersection = e.detail.intersections[0];
+  },
+
+  onIntersectionCleared: function (e, self) {
+    console.log('onintersectioncleared');
+    self.intersection = null;
+  },
+
+  update: function () {
+    if (this.data.by) {
+      this.handEl = this.data.by;
+    } else {
+      this.handEl = this.el.parentNode;
+    }
+  },
+
+  remove: function () {
+    this.handEl = null;
+    this.intersection = null;
+    // this.removeEventListeners(this);
+  },
+
+  tick: function () {
+    const handComp = this.handEl.components['leap-hand'];
+    const hand = handComp.getHand();
+
+    if (hand && hand.valid) {
+      if (this.data.finger) {
+        const finger = handComp.getFinger(hand, this.data.fingerId);
+        const origin = new THREE.Vector3();
+        const position = new THREE.Vector3();
+
+        origin.fromArray(finger.tipPosition);
+        position.copy(origin);
+        this.el.object3D.position.set(position.x, position.y, position.z);
+      } else {
+        if (this.data.crawling && this.intersection) {
+          const raycaster = this.data.raycaster.components['raycaster'];
+          raycaster.checkIntersections();
+          var intersection = this.intersection;
+          var mat = intersection.object.matrixWorld;
+          mat.setPosition(new THREE.Vector3(0, 0, 0));
+          var global_normal = intersection.face.normal.clone().applyMatrix4(mat).normalize();
+          var lookAtTarget = new THREE.Vector3().addVectors(intersection.point, global_normal);
+          this.el.object3D.lookAt(lookAtTarget);
+          var cursorPosition = new THREE.Vector3().addVectors(intersection.point, global_normal.multiplyScalar(0.05));
+          this.el.object3D.position.set(cursorPosition.x, cursorPosition.y, cursorPosition.z);
+        } else if (this.el.components['raycaster'] !== undefined) {
+          const origin = new THREE.Vector3();
+          const palmNormal = new THREE.Vector3();
+          const direction = new THREE.Vector3();
+          const position = new THREE.Vector3();
+          const distance = new THREE.Vector3();
+
+          origin.fromArray(hand.palmPosition);
+          palmNormal.fromArray(hand.palmNormal);
+          direction.fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
+          distance.copy(direction).multiplyScalar(this.data.distance);
+          position.copy(origin).add(distance);
+          this.el.object3D.position.set(position.x, position.y, position.z);
+
+          this.el.setAttribute('raycaster', {
+            'origin': origin,
+            'direction': direction
+          });
+        } else {
+          const raycaster = this.data.raycaster.components['raycaster'];
+          raycaster.checkIntersections();
+          const ray = raycaster.raycaster.ray;
+          const origin = new THREE.Vector3();
+          const direction = new THREE.Vector3();
+          const distance = new THREE.Vector3()
+          const position = new THREE.Vector3();
+          origin.copy(ray.origin);
+          direction.copy(ray.direction);
+          distance.copy(direction).multiplyScalar(0.5);
+          position.copy(origin).add(distance);
+          if (this.data.lookAtOrigin) {
+            this.el.object3D.lookAt(ray.origin);
+          }
+          this.el.object3D.position.set(position.x, position.y, position.z);
+        }
+      }
+    }
+  }
+
+});
