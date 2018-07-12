@@ -118,6 +118,27 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.tapStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(tapBufferLen);
 
 		this.el.setObject3D('mesh', this.handMesh.getMesh());
+		this.el.setAttribute('visible', false);
+
+		this.palmWearables = [];
+		this.fingerWearables = [];
+	},
+
+	update: function () {
+		const data = this.data;
+		if (data.enablePhysics && !this.handBody) {
+			this.handBody = new HandBody(this.el, this);
+		} else if (!data.enablePhysics && this.handBody) {
+			this.handBody.remove();
+			this.handBody = null;
+		}
+
+		for (let i = 0; i < this.palmWearables.length; i++) {
+			this.el.removeChild(this.palmWearables[i]);
+		}
+		for (let i = 0; i < this.fingerWearables.length; i++) {
+			this.el.removeChild(this.fingerWearables[i]);
+		}
 
 		this.palmWearables = this.data.palmWearables;
 		for (let i = 0; i < this.palmWearables.length; i++) {
@@ -133,18 +154,6 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			if (fingerWearable.parentNode !== this.el) {
 				this.el.appendChild(fingerWearable);
 			}
-		}
-
-		this.el.setAttribute('visible', false);
-	},
-
-	update: function () {
-		const data = this.data;
-		if (data.enablePhysics && !this.handBody) {
-			this.handBody = new HandBody(this.el, this);
-		} else if (!data.enablePhysics && this.handBody) {
-			this.handBody.remove();
-			this.handBody = null;
 		}
 	},
 

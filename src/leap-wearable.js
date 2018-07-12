@@ -15,6 +15,10 @@ module.exports = AFRAME.registerComponent('leap-wearable', {
     distance: {
       type: 'number',
       default: 0
+    },
+    lookAtOrigin: {
+      type: 'boolean',
+      default: true
     }
   },
 
@@ -64,7 +68,9 @@ module.exports = AFRAME.registerComponent('leap-wearable', {
         distance.copy(direction).multiplyScalar(this.data.distance);
         position.copy(origin).add(distance);
         this.el.object3D.position.set(position.x, position.y, position.z);
-        this.el.object3D.lookAt(origin);
+        if (this.data.lookAtOrigin) {
+          this.el.object3D.lookAt(origin);
+        }
 
         if (this.el.components['raycaster'] !== undefined) {
           this.el.setAttribute('raycaster', {
