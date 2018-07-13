@@ -11,14 +11,14 @@
 	<script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
 	<script src="https://unpkg.com/aframe-animation-component@^4.1.2/dist/aframe-animation-component.min.js"></script>
 	<script src="https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js"></script>
-	<script src="https://unpkg.com/aframe-motion-capture-components/dist/aframe-motion-capture-components.min.js"></script>
+	<script src="https://rawgit.com/songer1993/aframe-motion-capture-components/master/dist/aframe-motion-capture-components.js"></script>
 	<script src="https://rawgit.com/songer1993/aframe-environment-component/master/dist/aframe-environment-component.js"></script>
 	<script src="./dist/aframe-leap-hands.js"></script>
 	<script src="./playground.js"></script>
 </head>
 
 <body>
-	<a-scene environment physics avatar-recorder="localStorage: true">
+	<a-scene environment physics avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2">
 		<a-assets>
 			<!-- hand cursor ring -->
 			<!-- geometry="primitive: ring; radius-outer: 0.08; radius-inner: 0.05" -->
@@ -60,18 +60,19 @@
 					  static-body grabbable sleepy collision-filter="group: cube; collidesWith: default, hands" leap-wearable="holdDistance:0.05"></a-entity>
 					<a-entity id="left-palm-cursor" mixin="hand-cursor" leap-wearable="holdDistance: 0"></a-entity>
 					<a-entity id="left-palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-cursor; holdDistance: 0.15;"></a-entity>
-					<a-entity id="controller1" hand-controls="left" leap-wearable></a-entity>
 				</a-entity>
 				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: false; palmWearables: #palm-cursor, #palm-ring, #index-finger-clicker; fingerWearables: #index-finger-tip">
 					<a-entity id="index-finger-clicker" mixin="finger-clicker" leap-wearable="raycaster: #palm-cursor"></a-entity>
 					<a-entity id="palm-cursor" mixin="hand-cursor" leap-wearable="holdDistance: 0"></a-entity>
 					<a-entity id="palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-cursor; holdDistance: 0.15;"></a-entity>
 					<a-entity id="index-finger-tip" mixin="finger-tip" leap-wearable="raycaster: #palm-curosr; finger: true; fingerId: 1"></a-entity>
-					<a-entity id="controller2" hand-controls="right" leap-wearable></a-entity>
 				</a-entity>
 			</a-camera>
 		</a-entity>
 
+		<!-- Hands -->
+		<a-entity id="left" hand-controls="left"></a-entity>
+		<a-entity id="right" hand-controls="right"></a-entity>
 
 		<a-entity id="box1" mixin="cube" position="-0.5 0.3 -1" material="color: red"></a-entity>
 		<a-entity id="box2" mixin="cube" position="0.00 0.6 -1" material="color: green"></a-entity>
