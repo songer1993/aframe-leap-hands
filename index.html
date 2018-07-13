@@ -4,19 +4,21 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1">
-	<title>Examples • Grabbing</title>
+	<title>Leap Hand Example</title>
 	<script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
 	<script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.1.2/dist/aframe-physics-system.min.js"></script>
 	<script src="https://unpkg.com/aframe-physics-extras@0.1.2/dist/aframe-physics-extras.min.js"></script>
 	<script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
 	<script src="https://unpkg.com/aframe-animation-component@^4.1.2/dist/aframe-animation-component.min.js"></script>
 	<script src="https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js"></script>
+	<script src="https://unpkg.com/aframe-motion-capture-components/dist/aframe-motion-capture-components.min.js"></script>
+	<script src="https://rawgit.com/songer1993/aframe-environment-component/master/dist/aframe-environment-component.js"></script>
 	<script src="./dist/aframe-leap-hands.js"></script>
 	<script src="./playground.js"></script>
 </head>
 
 <body>
-	<a-scene physics="gravity: 0">
+	<a-scene environment physics avatar-recorder="localStorage: true">
 		<a-assets>
 			<!-- hand cursor ring -->
 			<!-- geometry="primitive: ring; radius-outer: 0.08; radius-inner: 0.05" -->
@@ -30,19 +32,19 @@
 			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin> -->
 
 			<!-- hand cursor -->
-			<a-mixin id="hand-cursor" raycaster="far: 10; showLine: true; objects: [grabbable], [hoverable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
+			<a-mixin id="hand-cursor" raycaster="far: 10; showLine: true; objects: [grabbable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: release; stretchStartButtons: handpinch; stretchEndButtons: release; dragDropStartButtons: handpinch; dragDropEndButtons: release"
 			  static-body="shape: sphere; sphereRadius: 0.02">
 			</a-mixin>
 			<!-- finger clicker -->
 			<a-mixin id="finger-clicker" raycaster="far: 10; showLine: false; objects: [grabbable], [clickable], [hoverable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: fingertap;"
 			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
 			<!-- hand finger -->
-			<a-mixin id="finger-tip" geometry="primitive: sphere; radius: 0.02" material="color: blue; opacity: 0.75" physics-collider
+			<a-mixin id="finger-tip" geometry="primitive: sphere; radius: 0.02" material="color: blue; opacity: 0.1" physics-collider
 			  static-body="shape: sphere; sphereRadius: 0.02" super-hands="colliderEvent: collisions; colliderEventProperty: els; colliderEndEvent: collisions; colliderEndEventProperty: clearedEls; grabStartButtons: collisions; grabEndButtons: collisions"
 			  collision-filter="group: hands; collidesWith: cube; collisionForces: false"></a-mixin>
 			<!-- cube -->
-			<a-mixin id="cube" geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25" material="opacity: 1" dynamic-body hoverable
-			  grabbable sleepy collision-filter="group: cube; collidesWith: default, hands" event-set__1="_event: hover-start; material.opacity: 0.5"
+			<a-mixin id="cube" geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25" material="opacity: 1" dynamic-body mixin="interactable"
+			  sleepy collision-filter="group: cube; collidesWith: default, hands" event-set__1="_event: hover-start; material.opacity: 0.5"
 			  event-set__2="_event: hover-end; material.opacity: 1"></a-mixin>
 
 			<a-mixin id="interactable" hoverable grabbable stretchable draggable dropppable></a-mixin>
@@ -53,31 +55,37 @@
 			<!-- camera setting -->
 			<a-camera near=0.01 fov=110 position="0 0 0">
 				<!-- leap hands -->
-				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: false; palmWearables: #palm-box; fingerWearables: null;">
+				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: false; palmWearables: #left-palm-cursor, #left-palm-ring, #palm-box; fingerWearables: null;">
 					<a-entity id="palm-box" geometry="primitive: box; width: 0.05; height: 0.05; depth: 0.05" material="opacity: 0.75; color: red"
 					  static-body grabbable sleepy collision-filter="group: cube; collidesWith: default, hands" leap-wearable="holdDistance:0.05"></a-entity>
+					<a-entity id="left-palm-cursor" mixin="hand-cursor" leap-wearable="holdDistance: 0"></a-entity>
+					<a-entity id="left-palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-cursor; holdDistance: 0.15;"></a-entity>
+					<a-entity id="controller1" hand-controls="left" leap-wearable></a-entity>
 				</a-entity>
 				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: false; palmWearables: #palm-cursor, #palm-ring, #index-finger-clicker; fingerWearables: #index-finger-tip">
 					<a-entity id="index-finger-clicker" mixin="finger-clicker" leap-wearable="raycaster: #palm-cursor"></a-entity>
 					<a-entity id="palm-cursor" mixin="hand-cursor" leap-wearable="holdDistance: 0"></a-entity>
-					<a-entity id="palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-raycaster; holdDistance: 0.15;"></a-entity>
+					<a-entity id="palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-cursor; holdDistance: 0.15;"></a-entity>
 					<a-entity id="index-finger-tip" mixin="finger-tip" leap-wearable="raycaster: #palm-curosr; finger: true; fingerId: 1"></a-entity>
+					<a-entity id="controller2" hand-controls="right" leap-wearable></a-entity>
 				</a-entity>
 			</a-camera>
 		</a-entity>
 
 
-		<a-entity id="box1" mixin="cube" position="-1 0.3 -1" material="color: red"></a-entity>
+		<a-entity id="box1" mixin="cube" position="-0.5 0.3 -1" material="color: red"></a-entity>
 		<a-entity id="box2" mixin="cube" position="0.00 0.6 -1" material="color: green"></a-entity>
 		<a-entity id="box3" mixin="cube" position="0.125 0.3 -1" material="color: blue"></a-entity>
 
-		<!-- Terrain -->
-		<a-grid static-body></a-grid>
+		<!-- Ground -->
+		<a-entity geometry="primitive: plane; height: 100; width: 100" rotation="-90 0 0" material="color: black; opacity: 0" static-body
+		  collision-filter="group: default; collidesWith: cube"></a-entity>
+		<!-- <a-grid static-body></a-grid> -->
 
 		<!-- Lighting -->
-		<a-light type="ambient" color="#ccc"></a-light>
+		<!-- <a-light type="ambient" color="#ccc"></a-light>
 		<a-light color="#ddf" distance="100" intensity="0.4" type="point"></a-light>
-		<a-light color="#ddf" position="3 10 -10" distance="50" intensity="0.4" type="point"></a-light>
+		<a-light color="#ddf" position="3 10 -10" distance="50" intensity="0.4" type="point"></a-light> -->
 	</a-scene>
 	<script>
 		var box1 = document.querySelector('#box1');
