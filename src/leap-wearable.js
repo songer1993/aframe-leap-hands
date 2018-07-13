@@ -85,23 +85,11 @@ module.exports = AFRAME.registerComponent('leap-wearable', {
   },
 
   onIntersection: function (e) {
-    console.log('onintersection');
     this.intersection = this.getNearestIntersection(e.detail.intersections);
-    if (this.data.crawling && this.intersection) {
-      this.el.setAttribute('material', 'color', 'white');
-    }
-    const self = this;
-    setInterval(function () {
-      self.raycasterEl.components['raycaster'].refreshObjects();
-    }, 100);
   },
 
   onIntersectionCleared: function (e) {
-    console.log('onintersectioncleared');
     this.intersection = null;
-    if (this.data.crawling) {
-      this.el.setAttribute('material', 'color', 'black');
-    }
   },
 
   getNearestIntersection: function (intersections) {
@@ -122,6 +110,17 @@ module.exports = AFRAME.registerComponent('leap-wearable', {
     this.removeEventListeners();
   },
 
+  crawl: function () {
+    const intersection = this.intersection;
+    const worldToLocalMat = new THREE.Matrix4().getInverse(this.handEl.object3D.matrixWorld);
+    const worldPoint = intersection.point.clone();
+    const worldNormal = intersection.face.normal.clone().normalize();
+    const lookAtTarget = new THREE.Vector3().addVectors(worldPoint, worldNormal).applyMatrix4(worldToLocalMat);
+    this.el.object3D.lookAt(lookAtTarget);
+    const position = new THREE.Vector3().addVectors(worldPoint, worldNormal.multiplyScalar(this.data.crawlingDistance)).applyMatrix4(worldToLocalMat);
+    this.el.object3D.position.set(position.x, position.y, position.z);
+  },
+
   tick: function () {
     const handComp = this.handEl.components['leap-hand'];
     const hand = handComp.getHand();
@@ -135,48 +134,22 @@ module.exports = AFRAME.registerComponent('leap-wearable', {
         position.copy(origin);
         this.el.object3D.position.set(position.x, position.y, position.z);
       } else {
-        if (this.raycasterEl) {
-          const raycaster = this.raycasterEl.components['raycaster'];
-          raycaster.checkIntersections();
-          const intersection = this.getNearestIntersection(raycaster.intersections);
-          if (this.data.crawling && intersection) {
-            const worldToLocalMat = new THREE.Matrix4().getInverse(this.handEl.object3D.matrixWorld);
-            const worldPoint = intersection.point.clone();
-            const worldNormal = intersection.face.normal.clone().normalize();
-            const lookAtTarget = new THREE.Vector3().addVectors(worldPoint, worldNormal).applyMatrix4(worldToLocalMat);
-            this.el.object3D.lookAt(lookAtTarget);
-            const position = new THREE.Vector3().addVectors(worldPoint, worldNormal.multiplyScalar(this.data.crawlingDistance)).applyMatrix4(worldToLocalMat);
-            this.el.object3D.position.set(position.x, position.y, position.z);
-          } else {
-            const origin = new THREE.Vector3().fromArray(hand.palmPosition);
-            const palmNormal = new THREE.Vector3().fromArray(hand.palmNormal);;
-            const direction = new THREE.Vector3().fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
-            const distance = new THREE.Vector3().copy(direction).multiplyScalar(this.data.holdDistance);
-            const position = new THREE.Vector3().copy(origin).add(distance);
+        const origin = new THREE.Vector3().fromArray(hand.palmPosition);
+        const palmNormal = new THREE.Vector3().fromArray(hand.palmNormal);;
+        const direction = new THREE.Vector3().fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
+        const distance = new THREE.Vector3().copy(direction).multiplyScalar(this.data.holdDistance);
+        const position = new THREE.Vector3().copy(origin).add(distance);
 
-            this.el.object3D.position.set(position.x, position.y, position.z);
-            if (this.data.lookAtOrigin) {
-              this.el.object3D.lookAt(origin);
-            }
-          }
-        } else {
-          const origin = new THREE.Vector3().fromArray(hand.palmPosition);
-          const palmNormal = new THREE.Vector3().fromArray(hand.palmNormal);;
-          const direction = new THREE.Vector3().fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
-          const distance = new THREE.Vector3().copy(direction).multiplyScalar(this.data.holdDistance);
-          const position = new THREE.Vector3().copy(origin).add(distance);
+        this.el.object3D.position.set(position.x, position.y, position.z);
+        if (this.data.lookAtOrigin) {
+          this.el.object3D.lookAt(origin);
+        }
 
-          this.el.object3D.position.set(position.x, position.y, position.z);
-          if (this.data.lookAtOrigin) {
-            this.el.object3D.lookAt(origin);
-          }
-
-          if (this.el.components['raycaster'] !== undefined) {
-            this.el.setAttribute('raycaster', {
-              'origin': origin,
-              'direction': direction
-            });
-          }
+        if (this.el.components['raycaster'] !== undefined) {
+          this.el.setAttribute('raycaster', {
+            'origin': origin,
+            'direction': direction
+          });
         }
       }
     }

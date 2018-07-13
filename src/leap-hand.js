@@ -67,7 +67,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		}, // ms
 		tapSensitivity: {
 			type: 'number',
-			default: 0.2
+			default: 0.1
 		}, // [0,1]
 		holdSensitivity: {
 			type: 'number',
@@ -323,9 +323,9 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 
 		for (let i = 0; i < this.palmWearables.length; i++) {
 			this.palmWearables[i].emit(EVENTS.RELEASE, eventDetail);
-			// if (this.isTapping) {
-			// 	this.palmWearables[i].emit(EVENTS.CLICK, eventDetail);
-			// }
+			if (this.isTapping) {
+				this.palmWearables[i].emit(EVENTS.CLICK, eventDetail);
+			}
 		}
 
 		for (let i = 0; i < this.fingerWearables.length; i++) {

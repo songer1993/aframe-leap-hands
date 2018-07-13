@@ -5,6 +5,12 @@
 	<meta http-equiv="content-type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1">
 	<title>Examples • Grabbing</title>
+	<script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
+	<script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.1.2/dist/aframe-physics-system.min.js"></script>
+	<script src="https://unpkg.com/aframe-physics-extras@0.1.2/dist/aframe-physics-extras.min.js"></script>
+	<script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
+	<script src="https://unpkg.com/aframe-animation-component@^4.1.2/dist/aframe-animation-component.min.js"></script>
+	<script src="https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js"></script>
 	<script src="./dist/aframe-leap-hands.js"></script>
 	<script src="./playground.js"></script>
 </head>
@@ -13,21 +19,31 @@
 	<a-scene physics="gravity: 0">
 		<a-assets>
 			<!-- hand cursor ring -->
-			<a-mixin id="hand-cursor-ring" position="0 0 0" scale="1 1 1" geometry="primitive: ring;radiusOuter: 0.08; radiusInner: 0.05; segmentsTheta: 32"
-			  material="color: black; shader: flat; opacity: 0.95" clickable animation="startEvents: click; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 5 5 5; dur: 500; loop: 2"></a-mixin>
+			<!-- geometry="primitive: ring; radius-outer: 0.08; radius-inner: 0.05" -->
+			<!-- event-set__1="_event: raycaster-intersection; material.color: white" event-set__2="_event:raycaster-intersection-cleared; material.color: orange" -->
+
+			<a-mixin id="hand-cursor-ring" static-body="shape: sphere; sphereRadius: 0.02" position="0 0 0" scale="1 1 1" geometry="primitive: ring; radius-outer: 0.08; radius-inner: 0.05"
+			  material="color: black; shader: flat; opacity: 0.5" animation="startEvents: release; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 2 2 2; dur: 500; loop: 2"
+			  event-set__3="_event: handpinch; material.color: orange" event-set__4="_event: release; material.color: black"></a-mixin>
+			<!-- hand raycaster -->
+			<!-- <a-mixin id="hand-cursor" raycaster="showLine: true; objects: [grabbable], [clickable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
+			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin> -->
+
 			<!-- hand cursor -->
-			<a-mixin id="hand-cursor" raycaster="showLine: true; objects: [grabbable], [clickable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
-			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
+			<a-mixin id="hand-cursor" raycaster="far: 10; showLine: true; objects: [grabbable], [hoverable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
+			  static-body="shape: sphere; sphereRadius: 0.02">
+			</a-mixin>
 			<!-- finger clicker -->
-			<a-mixin id="finger-clicker" raycaster="showLine: false; objects: [grabbable], [clickable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: fingertap;"
+			<a-mixin id="finger-clicker" raycaster="far: 10; showLine: false; objects: [grabbable], [clickable], [hoverable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: fingertap;"
 			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
 			<!-- hand finger -->
 			<a-mixin id="finger-tip" geometry="primitive: sphere; radius: 0.02" material="color: blue; opacity: 0.75" physics-collider
 			  static-body="shape: sphere; sphereRadius: 0.02" super-hands="colliderEvent: collisions; colliderEventProperty: els; colliderEndEvent: collisions; colliderEndEventProperty: clearedEls; grabStartButtons: collisions; grabEndButtons: collisions"
 			  collision-filter="group: hands; collidesWith: cube; collisionForces: false"></a-mixin>
 			<!-- cube -->
-			<a-mixin id="cube" geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25" material="opacity: 1" dynamic-body grabbable
-			  sleepy collision-filter="group: cube; collidesWith: default, hands"></a-mixin>
+			<a-mixin id="cube" geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25" material="opacity: 1" dynamic-body hoverable
+			  grabbable sleepy collision-filter="group: cube; collidesWith: default, hands" event-set__1="_event: hover-start; material.opacity: 0.5"
+			  event-set__2="_event: hover-end; material.opacity: 1"></a-mixin>
 
 			<a-mixin id="interactable" hoverable grabbable stretchable draggable dropppable></a-mixin>
 		</a-assets>
@@ -41,11 +57,11 @@
 					<a-entity id="palm-box" geometry="primitive: box; width: 0.05; height: 0.05; depth: 0.05" material="opacity: 0.75; color: red"
 					  static-body grabbable sleepy collision-filter="group: cube; collidesWith: default, hands" leap-wearable="holdDistance:0.05"></a-entity>
 				</a-entity>
-				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: false; palmWearables: #palm-raycaster, #palm-ring, #index-finger-clicker; fingerWearables: #index-finger-tip">
-					<a-entity id="index-finger-clicker" mixin="finger-clicker" leap-wearable="raycaster: #palm-raycaster"></a-entity>
-					<a-entity id="palm-raycaster" mixin="hand-cursor" leap-wearable></a-entity>
+				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: false; palmWearables: #palm-cursor, #palm-ring, #index-finger-clicker; fingerWearables: #index-finger-tip">
+					<a-entity id="index-finger-clicker" mixin="finger-clicker" leap-wearable="raycaster: #palm-cursor"></a-entity>
+					<a-entity id="palm-cursor" mixin="hand-cursor" leap-wearable="holdDistance: 0"></a-entity>
 					<a-entity id="palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-raycaster; holdDistance: 0.15;"></a-entity>
-					<a-entity id="index-finger-tip" mixin="finger-tip" leap-wearable="raycaster: #palm-raycaster; finger: true; fingerId: 1"></a-entity>
+					<a-entity id="index-finger-tip" mixin="finger-tip" leap-wearable="raycaster: #palm-curosr; finger: true; fingerId: 1"></a-entity>
 				</a-entity>
 			</a-camera>
 		</a-entity>
@@ -70,6 +86,9 @@
 		var rightHand = document.querySelector("#right-hand");
 		var leftHand = document.querySelector("#left-hand");
 		var palmBox = document.querySelector('#palm-box');
+		var palmRing = document.querySelector('#palm-ring');
+		var palmRaycaster = document.querySelector('#palm-cursor');
+
 
 		function checkClickEvent(e) {
 			if (e instanceof MouseEvent) {
@@ -90,24 +109,41 @@
 			}
 		});
 
-
 		box1.addEventListener('click', (e) => {
-			// if (checkClickEvent(e)) {
-			box1.setAttribute('material', 'color', getRandomColor());
-			// }
+			if (checkClickEvent(e)) {
+				box1.setAttribute('material', 'color', getRandomColor());
+			}
 		});
 
-		box2.addEventListener('click', () => {
-			box2.setAttribute('material', 'color', getRandomColor());
+		box2.addEventListener('click', (e) => {
+			if (checkClickEvent(e)) {
+				box2.setAttribute('material', 'color', getRandomColor());
+			}
 		});
 
-		box3.addEventListener('click', () => {
-			box3.setAttribute('material', 'color', getRandomColor());
+		box3.addEventListener('click', (e) => {
+			if (checkClickEvent(e)) {
+				box3.setAttribute('material', 'color', getRandomColor());
+			}
 		});
 
-		rightHand.addEventListener('grab-start', (e) => {
-			console.log(e);
-		});
+		// box1.addEventListener('click', (e) => {
+		// 	// if (checkClickEvent(e)) {
+		// 	box1.setAttribute('material', 'color', getRandomColor());
+		// 	// }
+		// });
+
+		// box2.addEventListener('click', () => {
+		// 	box2.setAttribute('material', 'color', getRandomColor());
+		// });
+
+		// box3.addEventListener('click', () => {
+		// 	box3.setAttribute('material', 'color', getRandomColor());
+		// });
+
+		// rightHand.addEventListener('grab-start', (e) => {
+		// 	console.log(e);
+		// });
 	</script>
 </body>
 
