@@ -10308,7 +10308,9 @@ var EVENTS = {
 	HANDHOLD: 'handhold',
 	RELEASE: 'release',
 	HANDOPEN: 'handopen',
-	FINGERTAP: 'fingertap'
+	FINGERTAP: 'fingertap',
+	HANDTURNPALMAR: 'handturnpalmar',
+	HANDTURNDORSAL: 'handturndorsal'
 };
 
 var STATES = {
@@ -10316,7 +10318,17 @@ var STATES = {
 	PINCHING: 'hand-pinching',
 	GRABBING: 'hand-grabbing',
 	HOLDING: 'hand-holding',
-	TAPPING: 'finger-tapping'
+	TAPPING: 'finger-tapping',
+	PALMAR: 'hand-palmar',
+	DORSAL: 'hand-dorsal'
+};
+
+var FINGERS = {
+	0: 'thumb',
+	1: 'index',
+	2: 'middle',
+	3: 'ring',
+	4: 'pinky'
 };
 
 /**
@@ -10373,11 +10385,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			type: 'number',
 			default: 0.75
 		}, // [0,1]
-		palmWearables: {
-			type: 'selectorAll',
-			default: 'null'
-		},
-		fingerWearables: {
+		wearables: {
 			type: 'selectorAll',
 			default: 'null'
 		},
@@ -10400,6 +10408,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.isGrabbing = false;
 		this.isHolding = false;
 		this.isTapping = false;
+		this.isPalmar = false;
 
 		var pinchBufferLen = Math.floor(this.data.pinchDebounce / (1000 / 120));
 		var grabBufferLen = Math.floor(this.data.grabDebounce / (1000 / 120));
@@ -10409,15 +10418,16 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.pinchStrength = 0;
 		this.holdStrength = 0;
 		this.tapStrength = 0;
+		this.turnStrength = 0;
 		this.grabStrengthBuffer = /** @type {CircularArray<number>} */new CircularArray(grabBufferLen);
 		this.pinchStrengthBuffer = /** @type {CircularArray<number>} */new CircularArray(pinchBufferLen);
 		this.tapStrengthBuffer = /** @type {CircularArray<number>} */new CircularArray(tapBufferLen);
+		this.turnStrengthBuffer = /** @type {CircularArray<number>} */new CircularArray(tapBufferLen);
 
 		this.el.setObject3D('mesh', this.handMesh.getMesh());
 		this.el.setAttribute('visible', false);
 
-		this.palmWearables = [];
-		this.fingerWearables = [];
+		this.wearables = [];
 	},
 
 	update: function update() {
@@ -10429,26 +10439,15 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.handBody = null;
 		}
 
-		for (var i = 0; i < this.palmWearables.length; i++) {
-			this.el.removeChild(this.palmWearables[i]);
-		}
-		for (var _i = 0; _i < this.fingerWearables.length; _i++) {
-			this.el.removeChild(this.fingerWearables[_i]);
+		for (var i = 0; i < this.wearables.length; i++) {
+			this.el.removeChild(this.wearables[i]);
 		}
 
-		this.palmWearables = this.data.palmWearables;
-		for (var _i2 = 0; _i2 < this.palmWearables.length; _i2++) {
-			var palmWearable = this.palmWearables[_i2];
-			if (palmWearable.parentNode !== this.el) {
-				this.el.appendChild(palmWearable);
-			}
-		}
-
-		this.fingerWearables = this.data.fingerWearables;
-		for (var _i3 = 0; _i3 < this.fingerWearables.length; _i3++) {
-			var fingerWearable = this.fingerWearables[_i3];
-			if (fingerWearable.parentNode !== this.el) {
-				this.el.appendChild(fingerWearable);
+		this.wearables = this.data.wearables;
+		for (var _i = 0; _i < this.wearables.length; _i++) {
+			var wearable = this.wearables[_i];
+			if (wearable.parentNode !== this.el) {
+				this.el.appendChild(wearable);
 			}
 		}
 	},
@@ -10462,11 +10461,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.handBody.remove();
 			this.handBody = null;
 		}
-		for (var i = 0; i < this.palmWearables.length; i++) {
-			this.el.removeChild(this.palmWearables[i]);
-		}
-		for (var _i4 = 0; _i4 < this.fingerWearables.length; _i4++) {
-			this.el.removeChild(this.fingerWearables[_i4]);
+		for (var i = 0; i < this.wearables.length; i++) {
+			this.el.removeChild(this.wearables[i]);
 		}
 	},
 
@@ -10481,18 +10477,22 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.grabStrengthBuffer.push(hand.grabStrength);
 			this.pinchStrengthBuffer.push(hand.pinchStrength);
 			this.tapStrengthBuffer.push(-finger.touchDistance);
+			this.turnStrengthBuffer.push(hand.palmNormal[2]);
 			this.grabStrength = circularArrayAvg(this.grabStrengthBuffer);
 			this.pinchStrength = circularArrayAvg(this.pinchStrengthBuffer);
 			this.holdStrength = Math.max(this.grabStrength, this.pinchStrength);
 			this.openStrength = 1 - this.holdStrength;
 			this.tapStrength = circularArrayAvg(this.tapStrengthBuffer);
+			this.turnStrength = circularArrayAvg(this.turnStrengthBuffer);
 
 			var wasPinching = this.isPinching;
 			var wasGrabbing = this.isGrabbing;
 			var wasHolding = this.isHolding;
 			var wasOpening = this.isOpening;
 			var wasTapping = this.isTapping;
+			var wasPalmar = this.isPalmar;
 
+			var isPalmar = this.turnStrength > 0;
 			var isPinching = this.pinchStrength > (wasPinching ? this.data.releaseSensitivity : this.data.pinchSensitivity);
 			var isGrabbing = this.grabStrength > (wasGrabbing ? this.data.releaseSensitivity : this.data.grabSensitivity);
 			var isHolding = this.holdStrength > (wasHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
@@ -10514,11 +10514,14 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			if (isHolding && !wasHolding) this.hold(hand);
 			if (!isHolding && wasHolding) this.release(hand);
 
-			if (isOpening && !wasOpening) this.open(hand);
-			if (!isOpening && wasOpening) this.release(hand);
+			if (isOpening && !wasOpening && this.isPalmar) this.open(hand);
+			// if ((!isOpening && wasOpening) || !this.isPalmar) this.release(hand);
 
 			if (isTapping && !wasTapping) this.tap(hand);
 			if (!isTapping && wasTapping) this.release(hand);
+
+			if (isPalmar && !wasPalmar) this.turn(hand);
+			if (!isPalmar && wasPalmar) this.turn(hand);
 		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
 			this.release(null);
 		}
@@ -10547,12 +10550,52 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		}
 	},
 
+	findPinchingFingerType: function findPinchingFingerType(hand) {
+		var pincher;
+		var closest = 500;
+		var thumbPosition, fingerPosition;
+		for (var f = 0; f < 5; f++) {
+			current = hand.fingers[f];
+			thumbPosition = new THREE.Vector3().fromArray(hand.thumb.tipPosition);
+			fingerPosition = new THREE.Vector3().fromArray(current.tipPosition);
+			distance = thumbPosition.distanceTo(fingerPosition);
+			if (current != hand.thumb && distance < closest) {
+				closest = distance;
+				pincher = current;
+			}
+		}
+		return FINGERS[pincher.type];
+	},
+
+	turn: function turn(hand) {
+		var eventDetail = this.getEventDetail(hand);
+
+		if (this.isPalmar) {
+			this.el.emit(EVENTS.HANDTURNDORSAL, eventDetail);
+			for (var i = 0; i < this.wearables.length; i++) {
+				this.wearables[i].emit(EVENTS.HANDTURNDORSAL, eventDetail);
+			}
+			this.isPalmar = false;
+			this.el.addState(STATES.DORSAL);
+		} else {
+			this.el.emit(EVENTS.HANDTURNPALMAR, eventDetail);
+			for (var _i2 = 0; _i2 < this.wearables.length; _i2++) {
+				this.wearables[_i2].emit(EVENTS.HANDTURNPALMAR, eventDetail);
+			}
+			this.isPalmar = true;
+			this.el.addState(STATES.PALMAR);
+		}
+	},
+
 	pinch: function pinch(hand) {
+		// const pinchingFingerType = this.findPinchingFingerType(hand);
 		var eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDPINCH, eventDetail);
-		for (var i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.HANDPINCH, eventDetail);
+		// this.el.emit(EVENTS.HANDPINCH + pinchingFingerType, eventDetail);
+		for (var i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.HANDPINCH, eventDetail);
+			// this.wearables[i].emit(EVENTS.HANDPINCH + pinchingFingerType, eventDetail);
 		}
 
 		this.isPinching = true;
@@ -10563,8 +10606,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		var eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDGRAB, eventDetail);
-		for (var i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.HANDGRAB, eventDetail);
+		for (var i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.HANDGRAB, eventDetail);
 		}
 
 		this.isGrabbing = true;
@@ -10575,8 +10618,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		var eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDOPEN, eventDetail);
-		for (var i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.HANDOPEN, eventDetail);
+		for (var i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.HANDOPEN, eventDetail);
 		}
 
 		this.isOpening = true;
@@ -10587,8 +10630,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		var eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDHOLD, eventDetail);
-		for (var i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.HANDHOLD, eventDetail);
+		for (var i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.HANDHOLD, eventDetail);
 		}
 
 		this.isHolding = true;
@@ -10599,11 +10642,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		var eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.FINGERTAP, eventDetail);
-		for (var i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.FINGERTAP, eventDetail);
-		}
-		for (var _i5 = 0; _i5 < this.fingerWearables.length; _i5++) {
-			this.fingerWearables[_i5].emit(EVENTS.FINGERTAP, eventDetail);
+		for (var i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.FINGERTAP, eventDetail);
 		}
 
 		this.isTapping = true;
@@ -10616,18 +10656,11 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.el.emit(EVENTS.RELEASE, eventDetail);
 		this.el.emit(EVENTS.CLICK, eventDetail);
 
-		for (var i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.RELEASE, eventDetail);
-			if (this.isTapping) {
-				this.palmWearables[i].emit(EVENTS.CLICK, eventDetail);
+		for (var i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.RELEASE, eventDetail);
+			if (this.isHolding) {
+				this.wearables[i].emit(EVENTS.CLICK, eventDetail);
 			}
-		}
-
-		for (var _i6 = 0; _i6 < this.fingerWearables.length; _i6++) {
-			this.fingerWearables[_i6].emit(EVENTS.RELEASE, eventDetail);
-			// if (this.isTapping) {
-			// 	this.fingerWearables[i].emit(EVENTS.CLICK, eventDetail);
-			// }
 		}
 
 		if (this.isPinching) {
@@ -10674,50 +10707,61 @@ function circularArrayAvg(array) {
 	return avg / array.length;
 }
 },{"../lib/leap.hand-mesh":"h9F2","circular-array":"D7lf","./helpers/hand-body":"sh/A"}],"Xgk3":[function(require,module,exports) {
+var FINGER_IDS = {
+  thumb: 0,
+  index: 1,
+  middle: 2,
+  ring: 3,
+  pinky: 4
+};
+
 module.exports = AFRAME.registerComponent('leap-wearable', {
   schema: {
     hand: {
       type: 'selector'
     },
-    finger: {
-      type: 'boolean',
-      default: false
+    origin: {
+      type: 'string',
+      default: 'palm',
+      oneOf: ['palm', 'palmEdgeLower', 'palmEdgeMiddle', 'palmEdgeUpper', 'thumb', 'index', 'middle', 'ring', 'pinky']
     },
-    fingerId: {
-      type: 'number',
-      default: 1,
-      oneOf: [0, 1, 2, 3, 4]
+    direction: {
+      type: 'string',
+      default: 'palmNormal',
+      oneOf: ['palmNormal', 'thumb', 'index', 'middle', 'ring', 'pinky']
     },
-    holdDistance: {
-      type: 'number',
-      default: 0
+    translation: {
+      type: "string",
+      default: "0 0 0",
+      parse: AFRAME.utils.coordinates.parse
     },
-    lookAtOrigin: {
-      type: 'boolean',
-      default: true
+    lookAt: {
+      type: 'string',
+      default: 'end'
     },
-    raycaster: {
-      type: 'selector'
+    show: {
+      type: 'string',
+      default: '',
+      parse: function parse(value) {
+        return value.split(',');
+      }
     },
-    crawling: {
-      type: 'boolean',
-      default: false
-    },
-    crawlingDistance: {
-      type: 'number',
-      default: 0.05
+    hide: {
+      type: 'string',
+      default: '',
+      parse: function parse(value) {
+        return value.split(',');
+      }
     }
   },
 
   init: function init() {
-    this.intersection = null;
     this.handEl = null;
-    this.raycasterEl = null;
 
-    this.addEventListeners = this.addEventListeners.bind(this);
-    this.removeEventListeners = this.removeEventListeners.bind(this);
-    this.onIntersection = this.onIntersection.bind(this);
-    this.onIntersectionCleared = this.onIntersectionCleared.bind(this);
+    var bind = AFRAME.utils.bind;
+    this.show = bind(this.show, this);
+    this.hide = bind(this.hide, this);
+    // console.log(this.data.translation);
   },
 
   update: function update() {
@@ -10726,108 +10770,114 @@ module.exports = AFRAME.registerComponent('leap-wearable', {
     } else {
       this.handEl = this.el.parentNode;
     }
-    if (this.data.raycaster) {
-      this.raycasterEl = this.data.raycaster;
-    } else if (this.el.components['raycaster'] !== undefined) {
-      this.raycasterEl = null;
-    } else {
-      this.raycasterEl = this.el.parentNode.querySelector(['raycaster']);
-    }
+  },
+
+  play: function play() {
+    this.show();
     this.addEventListeners();
   },
 
-  addEventListeners: function addEventListeners() {
-    var _this = this;
-
-    var raycasterEl = this.raycasterEl;
-    if (raycasterEl) {
-      raycasterEl.addEventListener('raycaster-intersection', function (e) {
-        _this.onIntersection(e);
-      });
-      raycasterEl.addEventListener('raycaster-intersection-cleared', function (e) {
-        _this.onIntersectionCleared(e);
-      });
-    }
-  },
-
-  removeEventListeners: function removeEventListeners() {
-    var _this2 = this;
-
-    var raycasterEl = this.raycasterEl;
-    if (raycasterEl) {
-      raycasterEl.removeEventListener('raycaster-intersection', function (e) {
-        _this2.onIntersection(e);
-      });
-      raycasterEl.removeEventListener('raycaster-intersection-cleared', function (e) {
-        _this2.onIntersectionCleared(e);
-      });
-    }
-  },
-
-  onIntersection: function onIntersection(e) {
-    this.intersection = this.getNearestIntersection(e.detail.intersections);
-  },
-
-  onIntersectionCleared: function onIntersectionCleared(e) {
-    this.intersection = null;
-  },
-
-  getNearestIntersection: function getNearestIntersection(intersections) {
-    for (var i = 0, l = intersections.length; i < l; i++) {
-      // ignore cursor itself to avoid flicker && ignore "ignore-ray" class
-      if (this.el === intersections[i].object.el || intersections[i].object.el.classList.contains("ignore-ray")) {
-        continue;
-      }
-      return intersections[i];
-    }
-    return null;
-  },
-
   remove: function remove() {
-    this.handEl = null;
-    this.raycasterEl = null;
-    this.intersection = null;
+    this.hide();
     this.removeEventListeners();
   },
 
-  crawl: function crawl() {
-    var intersection = this.intersection;
-    var worldToLocalMat = new THREE.Matrix4().getInverse(this.handEl.object3D.matrixWorld);
-    var worldPoint = intersection.point.clone();
-    var worldNormal = intersection.face.normal.clone().normalize();
-    var lookAtTarget = new THREE.Vector3().addVectors(worldPoint, worldNormal).applyMatrix4(worldToLocalMat);
-    this.el.object3D.lookAt(lookAtTarget);
-    var position = new THREE.Vector3().addVectors(worldPoint, worldNormal.multiplyScalar(this.data.crawlingDistance)).applyMatrix4(worldToLocalMat);
-    this.el.object3D.position.set(position.x, position.y, position.z);
+  pause: function pause() {
+    this.removeEventListeners();
   },
 
+  addEventListeners: function addEventListeners() {
+    for (var i = 0; i < this.data.show.length; i++) {
+      this.el.addEventListener(this.data.show[i], this.show);
+    }
+    for (var _i = 0; _i < this.data.hide.length; _i++) {
+      this.el.addEventListener(this.data.hide[_i], this.hide);
+    }
+  },
+  removeEventListeners: function removeEventListeners() {
+    for (var i = 0; i < this.data.show.length; i++) {
+      this.el.removeEventListener(this.data.show[i], this.show);
+    }
+    for (var _i2 = 0; _i2 < this.data.hide.length; _i2++) {
+      this.el.removeEventListener(this.data.hide[_i2], this.hide);
+    }
+  },
+  show: function show() {
+    this.live = true;
+    this.el.setAttribute('visible', true);
+    // if (this.el.components['raycaster'] !== undefined) {
+    //   this.el.setAttribute('raycaster', 'enabled', true);
+    // }
+  },
+  hide: function hide() {
+    this.live = false;
+    this.el.setAttribute('visible', false);
+    this.el.object3D.position.set(-10000, -10000, -10000);
+    // if (this.el.components['raycaster'] !== undefined) {
+    //   this.el.setAttribute('raycaster', 'enabled', false);
+    // }
+  },
+
+
   tick: function tick() {
-    var handComp = this.handEl.components['leap-hand'];
-    var hand = handComp.getHand();
+    if (this.handEl && this.live) {
+      var handComp = this.handEl.components['leap-hand'];
+      var hand = handComp.getHand();
+      var fingerId = void 0;
+      var origin = void 0,
+          direction = void 0,
+          distance = void 0,
+          translation = void 0,
+          position = void 0,
+          end = void 0,
+          lookAtTarget = void 0;
 
-    if (hand && hand.valid) {
-      if (this.data.finger) {
-        var finger = handComp.getFinger(hand, this.data.fingerId);
-        var origin = new THREE.Vector3();
-        var position = new THREE.Vector3();
-        origin.fromArray(finger.tipPosition);
-        position.copy(origin);
+      if (hand && hand.valid) {
+        if (this.data.origin === 'palm') {
+          origin = new THREE.Vector3().fromArray(hand.palmPosition);
+        } else if (this.data.origin === 'palmEdgeLower') {
+          fingerId = FINGER_IDS['pinky'];
+          origin = new THREE.Vector3().fromArray(handComp.getFinger(hand, fingerId).metacarpal.prevJoint);
+        } else if (this.data.origin === 'palmEdgeMiddle') {
+          fingerId = FINGER_IDS['pinky'];
+          origin = new THREE.Vector3().fromArray(handComp.getFinger(hand, fingerId).mcpPosition);
+        } else if (this.data.origin === 'palmEdgeUpper') {
+          fingerId = FINGER_IDS['pinky'];
+          origin = new THREE.Vector3().fromArray(handComp.getFinger(hand, fingerId).proximal.prevJoint);
+        } else {
+          fingerId = FINGER_IDS[this.data.origin];
+          origin = new THREE.Vector3().fromArray(handComp.getFinger(hand, fingerId).tipPosition);
+        }
+
+        if (this.data.direction === 'palmNormal') {
+          direction = new THREE.Vector3().fromArray(hand.palmNormal);
+        } else if (this.data.direction === 'palmDirection') {
+          direction = new THREE.Vector3().fromArray(hand.direction);
+        } else if (this.data.direction === 'palmSelection') {
+          direction = new THREE.Vector3().fromArray(hand.direction).divideScalar(2).add(new THREE.Vector3().fromArray(hand.palmNormal)).normalize();
+        } else {
+          fingerId = FINGER_IDS[this.data.direction];
+          direction = new THREE.Vector3().fromArray(handComp.getFinger(hand, fingerId).direction);
+        }
+
+        distance = new THREE.Vector3().copy(direction).multiplyScalar(this.data.translation.z);
+        translation = new THREE.Vector3(this.data.translation.x, this.data.translation.y, 0);
+        position = new THREE.Vector3().copy(origin).add(translation).add(distance);
+        end = new THREE.Vector3().copy(position).add(direction);
+
         this.el.object3D.position.set(position.x, position.y, position.z);
-      } else {
-        var _origin = new THREE.Vector3().fromArray(hand.palmPosition);
-        var palmNormal = new THREE.Vector3().fromArray(hand.palmNormal);;
-        var direction = new THREE.Vector3().fromArray(hand.direction).divideScalar(2).add(palmNormal).normalize();
-        var distance = new THREE.Vector3().copy(direction).multiplyScalar(this.data.holdDistance);
-        var _position = new THREE.Vector3().copy(_origin).add(distance);
-
-        this.el.object3D.position.set(_position.x, _position.y, _position.z);
-        if (this.data.lookAtOrigin) {
-          this.el.object3D.lookAt(_origin);
+        if (this.data.lookAt === 'origin') {
+          this.el.object3D.lookAt(origin);
+        } else if (this.data.lookAt === 'end') {
+          this.el.object3D.lookAt(end);
+        } else {
+          lookAtTarget = document.querySelector(this.data.lookAt);
+          this.el.object3D.lookAt(lookAtTarget.object3D.position);
         }
 
         if (this.el.components['raycaster'] !== undefined) {
           this.el.setAttribute('raycaster', {
-            'origin': _origin,
+            'origin': origin,
             'direction': direction
           });
         }

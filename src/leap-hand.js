@@ -11,7 +11,9 @@ const EVENTS = {
 	HANDHOLD: 'handhold',
 	RELEASE: 'release',
 	HANDOPEN: 'handopen',
-	FINGERTAP: 'fingertap'
+	FINGERTAP: 'fingertap',
+	HANDTURNPALMAR: 'handturnpalmar',
+	HANDTURNDORSAL: 'handturndorsal'
 };
 
 const STATES = {
@@ -19,9 +21,18 @@ const STATES = {
 	PINCHING: 'hand-pinching',
 	GRABBING: 'hand-grabbing',
 	HOLDING: 'hand-holding',
-	TAPPING: 'finger-tapping'
+	TAPPING: 'finger-tapping',
+	PALMAR: 'hand-palmar',
+	DORSAL: 'hand-dorsal'
 };
 
+const FINGERS = {
+	0: 'thumb',
+	1: 'index',
+	2: 'middle',
+	3: 'ring',
+	4: 'pinky'
+};
 
 /**
  * A-Frame component for a single Leap Motion hand.
@@ -77,11 +88,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			type: 'number',
 			default: 0.75
 		}, // [0,1]
-		palmWearables: {
-			type: 'selectorAll',
-			default: 'null'
-		},
-		fingerWearables: {
+		wearables: {
 			type: 'selectorAll',
 			default: 'null'
 		},
@@ -104,6 +111,7 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.isGrabbing = false;
 		this.isHolding = false;
 		this.isTapping = false;
+		this.isPalmar = false;
 
 		const pinchBufferLen = Math.floor(this.data.pinchDebounce / (1000 / 120));
 		const grabBufferLen = Math.floor(this.data.grabDebounce / (1000 / 120));
@@ -113,15 +121,16 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.pinchStrength = 0;
 		this.holdStrength = 0;
 		this.tapStrength = 0;
+		this.turnStrength = 0;
 		this.grabStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(grabBufferLen);
 		this.pinchStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(pinchBufferLen);
 		this.tapStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(tapBufferLen);
+		this.turnStrengthBuffer = /** @type {CircularArray<number>} */ new CircularArray(tapBufferLen);
 
 		this.el.setObject3D('mesh', this.handMesh.getMesh());
 		this.el.setAttribute('visible', false);
 
-		this.palmWearables = [];
-		this.fingerWearables = [];
+		this.wearables = [];
 	},
 
 	update: function () {
@@ -133,26 +142,15 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.handBody = null;
 		}
 
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			this.el.removeChild(this.palmWearables[i]);
-		}
-		for (let i = 0; i < this.fingerWearables.length; i++) {
-			this.el.removeChild(this.fingerWearables[i]);
+		for (let i = 0; i < this.wearables.length; i++) {
+			this.el.removeChild(this.wearables[i]);
 		}
 
-		this.palmWearables = this.data.palmWearables;
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			let palmWearable = this.palmWearables[i];
-			if (palmWearable.parentNode !== this.el) {
-				this.el.appendChild(palmWearable);
-			}
-		}
-
-		this.fingerWearables = this.data.fingerWearables;
-		for (let i = 0; i < this.fingerWearables.length; i++) {
-			let fingerWearable = this.fingerWearables[i];
-			if (fingerWearable.parentNode !== this.el) {
-				this.el.appendChild(fingerWearable);
+		this.wearables = this.data.wearables;
+		for (let i = 0; i < this.wearables.length; i++) {
+			let wearable = this.wearables[i];
+			if (wearable.parentNode !== this.el) {
+				this.el.appendChild(wearable);
 			}
 		}
 	},
@@ -166,11 +164,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.handBody.remove();
 			this.handBody = null;
 		}
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			this.el.removeChild(this.palmWearables[i]);
-		}
-		for (let i = 0; i < this.fingerWearables.length; i++) {
-			this.el.removeChild(this.fingerWearables[i]);
+		for (let i = 0; i < this.wearables.length; i++) {
+			this.el.removeChild(this.wearables[i]);
 		}
 	},
 
@@ -185,22 +180,26 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			this.grabStrengthBuffer.push(hand.grabStrength);
 			this.pinchStrengthBuffer.push(hand.pinchStrength);
 			this.tapStrengthBuffer.push(-finger.touchDistance);
+			this.turnStrengthBuffer.push(hand.palmNormal[2]);
 			this.grabStrength = circularArrayAvg(this.grabStrengthBuffer);
 			this.pinchStrength = circularArrayAvg(this.pinchStrengthBuffer);
 			this.holdStrength = Math.max(this.grabStrength, this.pinchStrength);
 			this.openStrength = 1 - this.holdStrength;
 			this.tapStrength = circularArrayAvg(this.tapStrengthBuffer);
+			this.turnStrength = circularArrayAvg(this.turnStrengthBuffer);
 
 			const wasPinching = this.isPinching;
 			const wasGrabbing = this.isGrabbing;
 			const wasHolding = this.isHolding;
 			const wasOpening = this.isOpening;
 			const wasTapping = this.isTapping;
+			const wasPalmar = this.isPalmar;
 
+			let isPalmar = this.turnStrength > 0;
 			let isPinching = this.pinchStrength > (wasPinching ? this.data.releaseSensitivity : this.data.pinchSensitivity);
 			let isGrabbing = this.grabStrength > (wasGrabbing ? this.data.releaseSensitivity : this.data.grabSensitivity);
 			let isHolding = this.holdStrength > (wasHolding ? this.data.releaseSensitivity : this.data.holdSensitivity);
-			let isOpening = this.openStrength > (wasOpening ? this.data.releaseSensitivity : this.data.openSensitivity);
+			let isOpening = (this.openStrength > (wasOpening ? this.data.releaseSensitivity : this.data.openSensitivity));
 			let isTapping = this.tapStrength > (wasTapping ? 0 : this.data.tapSensitivity);
 
 			if (isHolding) {
@@ -218,11 +217,14 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 			if (isHolding && !wasHolding) this.hold(hand);
 			if (!isHolding && wasHolding) this.release(hand);
 
-			if (isOpening && !wasOpening) this.open(hand);
-			if (!isOpening && wasOpening) this.release(hand);
+			if ((isOpening && !wasOpening) && this.isPalmar) this.open(hand);
+			// if ((!isOpening && wasOpening) || !this.isPalmar) this.release(hand);
 
 			if (isTapping && !wasTapping) this.tap(hand);
 			if (!isTapping && wasTapping) this.release(hand);
+
+			if (isPalmar && !wasPalmar) this.turn(hand);
+			if (!isPalmar && wasPalmar) this.turn(hand);
 		} else if (this.isPinching || this.isGrabbing || this.isHolding) {
 			this.release(null);
 		}
@@ -251,12 +253,52 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		}
 	},
 
+	findPinchingFingerType: function (hand) {
+		var pincher;
+		var closest = 500;
+		var thumbPosition, fingerPosition;
+		for (var f = 0; f < 5; f++) {
+			current = hand.fingers[f];
+			thumbPosition = new THREE.Vector3().fromArray(hand.thumb.tipPosition);
+			fingerPosition = new THREE.Vector3().fromArray(current.tipPosition);
+			distance = thumbPosition.distanceTo(fingerPosition);
+			if (current != hand.thumb && distance < closest) {
+				closest = distance;
+				pincher = current;
+			}
+		}
+		return FINGERS[pincher.type];
+	},
+
+	turn: function (hand) {
+		const eventDetail = this.getEventDetail(hand);
+
+		if (this.isPalmar) {
+			this.el.emit(EVENTS.HANDTURNDORSAL, eventDetail);
+			for (let i = 0; i < this.wearables.length; i++) {
+				this.wearables[i].emit(EVENTS.HANDTURNDORSAL, eventDetail);
+			}
+			this.isPalmar = false;
+			this.el.addState(STATES.DORSAL);
+		} else {
+			this.el.emit(EVENTS.HANDTURNPALMAR, eventDetail);
+			for (let i = 0; i < this.wearables.length; i++) {
+				this.wearables[i].emit(EVENTS.HANDTURNPALMAR, eventDetail);
+			}
+			this.isPalmar = true;
+			this.el.addState(STATES.PALMAR);
+		}
+	},
+
 	pinch: function (hand) {
+		// const pinchingFingerType = this.findPinchingFingerType(hand);
 		const eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDPINCH, eventDetail);
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.HANDPINCH, eventDetail);
+		// this.el.emit(EVENTS.HANDPINCH + pinchingFingerType, eventDetail);
+		for (let i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.HANDPINCH, eventDetail);
+			// this.wearables[i].emit(EVENTS.HANDPINCH + pinchingFingerType, eventDetail);
 		}
 
 		this.isPinching = true;
@@ -267,8 +309,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		const eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDGRAB, eventDetail);
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.HANDGRAB, eventDetail);
+		for (let i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.HANDGRAB, eventDetail);
 		}
 
 		this.isGrabbing = true;
@@ -279,8 +321,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		const eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDOPEN, eventDetail);
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.HANDOPEN, eventDetail);
+		for (let i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.HANDOPEN, eventDetail);
 		}
 
 		this.isOpening = true;
@@ -291,8 +333,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		const eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.HANDHOLD, eventDetail);
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.HANDHOLD, eventDetail);
+		for (let i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.HANDHOLD, eventDetail);
 		}
 
 		this.isHolding = true;
@@ -303,11 +345,8 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		const eventDetail = this.getEventDetail(hand);
 
 		this.el.emit(EVENTS.FINGERTAP, eventDetail);
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.FINGERTAP, eventDetail);
-		}
-		for (let i = 0; i < this.fingerWearables.length; i++) {
-			this.fingerWearables[i].emit(EVENTS.FINGERTAP, eventDetail);
+		for (let i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.FINGERTAP, eventDetail);
 		}
 
 		this.isTapping = true;
@@ -321,20 +360,12 @@ module.exports = AFRAME.registerComponent('leap-hand', {
 		this.el.emit(EVENTS.RELEASE, eventDetail);
 		this.el.emit(EVENTS.CLICK, eventDetail);
 
-		for (let i = 0; i < this.palmWearables.length; i++) {
-			this.palmWearables[i].emit(EVENTS.RELEASE, eventDetail);
-			if (this.isTapping) {
-				this.palmWearables[i].emit(EVENTS.CLICK, eventDetail);
+		for (let i = 0; i < this.wearables.length; i++) {
+			this.wearables[i].emit(EVENTS.RELEASE, eventDetail);
+			if (this.isHolding) {
+				this.wearables[i].emit(EVENTS.CLICK, eventDetail);
 			}
 		}
-
-		for (let i = 0; i < this.fingerWearables.length; i++) {
-			this.fingerWearables[i].emit(EVENTS.RELEASE, eventDetail);
-			// if (this.isTapping) {
-			// 	this.fingerWearables[i].emit(EVENTS.CLICK, eventDetail);
-			// }
-		}
-
 
 		if (this.isPinching) {
 			this.el.removeState(STATES.PINCHING);

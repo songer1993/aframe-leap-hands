@@ -6,135 +6,296 @@
 	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1">
 	<title>Leap Hand Example</title>
 	<script src="https://aframe.io/releases/0.8.2/aframe.min.js"></script>
-	<script src="//cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.1.2/dist/aframe-physics-system.min.js"></script>
+	<script src="https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v3.1.2/dist/aframe-physics-system.min.js"></script>
 	<script src="https://unpkg.com/aframe-physics-extras@0.1.2/dist/aframe-physics-extras.min.js"></script>
+	<script src="https://unpkg.com/aframe-aabb-collider-component/dist/aframe-aabb-collider-component.min.js"></script>
 	<script src="https://unpkg.com/aframe-event-set-component@^4.0.0/dist/aframe-event-set-component.min.js"></script>
 	<script src="https://unpkg.com/aframe-animation-component@^4.1.2/dist/aframe-animation-component.min.js"></script>
 	<script src="https://unpkg.com/super-hands@2.1.0/dist/super-hands.min.js"></script>
-	<script src="https://rawgit.com/songer1993/aframe-motion-capture-components/master/dist/aframe-motion-capture-components.js"></script>
-	<script src="https://rawgit.com/songer1993/aframe-environment-component/master/dist/aframe-environment-component.js"></script>
+	<script src="https://rawgit.com/songer1993/aframe-material/master/dist/aframe-material.js"></script>
+	<!-- <script src="../aframe-material/dist/aframe-material.js"></script> -->
+	<script src="https://rawgit.com/songer1993/aframe-environment-component/master/dist/aframe-environment-component.min.js"></script>
+	<script src="https://rawgit.com/localForage/localForage/master/dist/localforage.nopromises.min.js"></script>
+	<script src="https://rawgit.com/rdub80/aframe-gui/master/dist/aframe-gui.min.js"></script>
+	<!-- <script src="https://rawgit.com/donmccurdy/aframe-extras/master/src/misc/sphere-collider.js"></script> -->
+	<script type="text/javascript">
+		AFRAME.ASSETS_PATH = "./assets";
+	</script>
 	<script src="./dist/aframe-leap-hands.js"></script>
+	<script src="./cursor.js"></script>
+	<script src="./event-editor.js"></script>
 	<script src="./playground.js"></script>
 </head>
 
 <body>
-	<a-scene environment physics avatar-recorder="spectatorPlay: true; spectatorPosition: 0 1.6 2">
+	<a-scene environment physics="gravity: 0">
 		<a-assets>
-			<!-- hand cursor ring -->
-			<!-- geometry="primitive: ring; radius-outer: 0.08; radius-inner: 0.05" -->
-			<!-- event-set__1="_event: raycaster-intersection; material.color: white" event-set__2="_event:raycaster-intersection-cleared; material.color: orange" -->
+			<!-- icons -->
+			<img id="buttonIcon" src="./assets/images/hockey-puck.png" crossorigin="anonymous">
+			<img id="inputIcon" src="./assets/images/login-variant.png" crossorigin="anonymous">
+			<img id="radioIcon" src="./assets/images/radiobox-marked.png" crossorigin="anonymous">
+			<img id="cardIcon" src="./assets/images/checkbox-multiple-blank.png" crossorigin="anonymous">
+			<img id="toggleIcon" src="./assets/images/toggle-switch.png" crossorigin="anonymous">
+			<img id="checkboxIcon" src="./assets/images/checkbox-marked.png" crossorigin="anonymous">
+			<img id="eventIcon" src="./assets/images/calendar-edit.png" crossorigin="anonymous">
+			<img id="targetIcon" src="./assets/images/target-variant.png" crossorigin="anonymous">
+			<img id="entityIcon" src="./assets/images/android-debug-bridge.png" crossorigin="anonymous">
 
-			<a-mixin id="hand-cursor-ring" static-body="shape: sphere; sphereRadius: 0.02" position="0 0 0" scale="1 1 1" geometry="primitive: ring; radius-outer: 0.08; radius-inner: 0.05"
-			  material="color: black; shader: flat; opacity: 0.5" animation="startEvents: release; easing: easeInQuad; property: scale; dir: alternate; from: 1 1 1; to: 2 2 2; dur: 500; loop: 2"
-			  event-set__3="_event: handpinch; material.color: orange" event-set__4="_event: release; material.color: black"></a-mixin>
-			<!-- hand raycaster -->
-			<!-- <a-mixin id="hand-cursor" raycaster="showLine: true; objects: [grabbable], [clickable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
-			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin> -->
-
+			<!-- gaze caster -->
+			<a-mixin id="gazecaster" position="0 0 -0.5" raycaster="objects: [hoverable]" cursor="rayOrigin: mouse" fuse-cursor="fuseTimeout: 3000; fuseFilters: grabbable,button; design: dot"
+			  super-hands="colliderEvent:raycaster-intersection;
+                            colliderEventProperty:els;
+                            colliderEndEvent:raycaster-intersection-cleared;
+                            colliderEndEventProperty:clearedEls;" static-body="shape: sphere; sphereRadius: 0.02">
+			</a-mixin>
+			<!-- hand-cursor-ring -->
+			<a-mixin id="hand-cursor-ring" raycaster="enabled: false" cursor="fuse: false" fuse-cursor="fuse: false; design: ring;" material="color: white; opacity: 0.5"
+			  event-set__3="_event: handhold; material.color: #4076fd" event-set__4="_event: release; material.color: white"></a-mixin>
 			<!-- hand cursor -->
-			<a-mixin id="hand-cursor" raycaster="far: 10; showLine: true; objects: [grabbable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handpinch; grabEndButtons: release; stretchStartButtons: handpinch; stretchEndButtons: release; dragDropStartButtons: handpinch; dragDropEndButtons: release"
-			  static-body="shape: sphere; sphereRadius: 0.02">
+			<a-mixin id="hand-cursor" raycaster="far: 10; showLine: true; objects: [grabbable], [clickable]" line="color: #4076fd" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: handhold; grabEndButtons: release; stretchStartButtons: handhold; stretchEndButtons: release; dragDropStartButtons: handhold; dragDropEndButtons: release"
+			  static-body="shape: sphere; sphereRadius: 0.2">
 			</a-mixin>
 			<!-- finger clicker -->
-			<a-mixin id="finger-clicker" raycaster="far: 10; showLine: false; objects: [grabbable], [clickable], [hoverable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: fingertap;"
+			<a-mixin id="finger-clicker" raycaster="far: 10; showLine: false; objects: [grabbable], [clickable]" super-hands="colliderEvent:raycaster-intersection; colliderEventProperty:els; colliderEndEvent:raycaster-intersection-cleared; colliderEndEventProperty:clearedEls; grabStartButtons: fingertap; grabEndButtons: fingertap;"
 			  static-body="shape: sphere; sphereRadius: 0.02"></a-mixin>
 			<!-- hand finger -->
-			<a-mixin id="finger-tip" geometry="primitive: sphere; radius: 0.02" material="color: blue; opacity: 0.1" physics-collider
-			  static-body="shape: sphere; sphereRadius: 0.02" super-hands="colliderEvent: collisions; colliderEventProperty: els; colliderEndEvent: collisions; colliderEndEventProperty: clearedEls; grabStartButtons: collisions; grabEndButtons: collisions"
-			  collision-filter="group: hands; collidesWith: cube; collisionForces: false"></a-mixin>
+			<a-mixin id="finger-tip" geometry="primitive: sphere; radius: 0.01" material="color: #4076fd; opacity: 0.5" physics-collider
+			  static-body="shape: sphere; sphereRadius: 0.01" super-hands="colliderEvent: collisions; colliderEventProperty: els; colliderEndEvent: collisions; colliderEndEventProperty: clearedEls; grabStartButtons: collisions; grabEndButtons: collisions"
+			  collision-filter="group: hands; collidesWith: cube, ui; collisionForces: false"></a-mixin>
+			<!-- <a-mixin id="finger-tip" geometry="primitive: sphere; radius: 0.02" material="color: blue; opacity: 0.5" sphere-collider
+			  static-body="shape: sphere; sphereRadius: 0.02" super-hands="grabStartButtons: hit; grabEndButtons: hit" collision-filter="group: hands; collidesWith: cube, ui; collisionForces: false"></a-mixin> -->
 			<!-- cube -->
-			<a-mixin id="cube" geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25" material="opacity: 1" dynamic-body mixin="interactable"
+			<a-mixin id="cube" geometry="primitive: box; width: 0.5; height: 0.5; depth: 0.5" material="opacity: 1" dynamic-body mixin="interactable"
 			  sleepy collision-filter="group: cube; collidesWith: default, hands" event-set__1="_event: hover-start; material.opacity: 0.5"
 			  event-set__2="_event: hover-end; material.opacity: 1"></a-mixin>
 
-			<a-mixin id="interactable" hoverable grabbable stretchable draggable dropppable></a-mixin>
-		</a-assets>
+			<a-mixin id="ui" static-body event-adapter__mousedown="from: grab-start; to: mousedown" event-adapter__mouseup="from: grab-end; to: mouseup"
+			  event-adapter__click="from: grab-end; to: click" sleepy collision-filter="group: ui; collidesWith: default, hands"></a-mixin>
 
+			<a-mixin id="dynamic" hoverable grabbable stretchable draggable dropppable></a-mixin>
+			<a-mixin id="static" hoverable clickable></a-mixin>
+
+			<a-mixin id="dynamic-ui" hoverable grabbable stretchable draggable dropppable event-adapter__mouseenter="from: hover-start; to: mouseenter"
+			  event-adapter__mouseleave="from: hover-end; to: mouseleave" event-adapter__mousedown="from: grab-start; to: mousedown"
+			  event-adapter__mouseup="from: grab-end; to: mouseup" event-adapter__click="from: grab-end; to: click" open-event-editor="event: fuseend; editor: #eventEditor"></a-mixin>
+
+			<a-mixin id="static-ui" hoverable clickable event-adapter__mouseenter="from: hover-start; to: mouseenter" event-adapter__mouseleave="from: hover-end; to: mouseleave"
+			  event-adapter__mousedown="from: grab-start; to: mousedown" event-adapter__mouseup="from: grab-end; to: mouseup" event-adapter__click="from: grab-end; to: click"
+			  static-body collision-filter="group: ui; collidesWith: default, hands"></a-mixin>
+		</a-assets>
+		<!-- <a-keypad is-open=true physical-keyboard=true scale="0.5 0.5 0.5" mixin="static-ui"> -->
+		</a-keypad>
 		<!-- camera rig -->
-		<a-entity id="#cameraRig" position="0 0.3 0">
+		<a-entity id="#cameraRig" movement-controls="fly: true">
 			<!-- camera setting -->
-			<a-camera near=0.01 fov=110 position="0 0 0">
-				<!-- leap hands -->
-				<a-entity id="left-hand" leap-hand="hand: left; enablePhysics: false; palmWearables: #left-palm-cursor, #left-palm-ring, #palm-box; fingerWearables: null;">
-					<a-entity id="palm-box" geometry="primitive: box; width: 0.05; height: 0.05; depth: 0.05" material="opacity: 0.75; color: red"
-					  static-body grabbable sleepy collision-filter="group: cube; collidesWith: default, hands" leap-wearable="holdDistance:0.05"></a-entity>
-					<a-entity id="left-palm-cursor" mixin="hand-cursor" leap-wearable="holdDistance: 0"></a-entity>
-					<a-entity id="left-palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-cursor; holdDistance: 0.15;"></a-entity>
+			<a-camera near=0.01 fov=110 position="0 1.6 0">
+				<a-entity mixin="gazecaster"></a-entity>
+				<!-- keyboard -->
+				<a-entity position="0 -0.8 1">
+					<a-entity id="keyboard" keyboard="isOpen: false; physicalKeyboard: true" mixin="static ui"></a-entity>
 				</a-entity>
-				<a-entity id="right-hand" leap-hand="hand: right; enablePhysics: false; palmWearables: #palm-cursor, #palm-ring, #index-finger-clicker; fingerWearables: #index-finger-tip">
-					<a-entity id="index-finger-clicker" mixin="finger-clicker" leap-wearable="raycaster: #palm-cursor"></a-entity>
-					<a-entity id="palm-cursor" mixin="hand-cursor" leap-wearable="holdDistance: 0"></a-entity>
-					<a-entity id="palm-ring" mixin="hand-cursor-ring" leap-wearable="raycaster: #palm-cursor; holdDistance: 0.15;"></a-entity>
-					<a-entity id="index-finger-tip" mixin="finger-tip" leap-wearable="raycaster: #palm-curosr; finger: true; fingerId: 1"></a-entity>
+				<!-- leap hands -->
+				<a-entity id="lefthand" leap-hand="hand: left; wearables: [id^='left-']">
+					<!-- buttons on finger tips -->
+					<!-- <a-circle-button id="left-btnBtn" radius=0.015 type="flat" src="#buttonIcon" mixin="static-ui" leap-wearable="origin: thumb; direction: palmNormal; translation: 0 0 0.015"
+					  spawn="entity: button; value: Click me; type: raised; mixin: dynamic-ui;"></a-circle-button>
+					<a-circle-button id="left-tglBtn" radius=0.015 type="flat" src="#toggleIcon" mixin="static-ui" leap-wearable="origin: index; direction: palmNormal; translation: 0 0 0.015"
+					  spawn="entity: switch; enabled: true; mixin: dynamic-ui;"></a-circle-button>
+					<a-circle-button id="left-inpBtn" radius=0.015 type="flat" src="#inputIcon" mixin="static-ui" leap-wearable="origin: middle; direction: palmNormal; translation: 0 0 0.015"
+					  spawn="entity: input; placeholder: Username; color: black; width: 1; mixin: dynamic-ui"></a-circle-button>
+					<a-circle-button id="left-chkBtn" radius=0.015 type="flat" src="#checkboxIcon" mixin="static-ui" leap-wearable="origin: ring; direction: palmNormal; translation: 0 0 0.015"
+					  spawn="entity: radio; label: a radio button; checked: true; disabled: false; mixin: dynamic-ui"></a-circle-button>
+					<a-circle-button id="left-rdoBtn" radius=0.015 type="flat" src="#radioIcon" mixin="static-ui" leap-wearable="origin: pinky; direction: palmNormal; translation: 0 0 0.015"
+					  spawn="entity: checkbox; width: 3; label: I am a checkbox; checked: true; mixin: dynamic-ui"></a-circle-button> -->
+
+					<!-- buttons around hand edge -->
+					<a-card id="left-menu" width=0.04 height=0.22 color='#263238' leap-wearable="origin: palmEdgeLower; direction: palmNormal; translation: 0.05 -0.1 0.03; lookAt: end; show: handopen; hide: release,handhold,handturndorsal">
+						<a-form>
+							<a-circle-button id="btnBtn" radius=0.015 src="#buttonIcon" mixin="static-ui" position="0.0225 0.03 0.001" spawn="entity: button; value: Click me; type: raised; mixin: dynamic-ui;"></a-circle-button>
+							<a-circle-button id="tglBtn" radius=0.015 src="#toggleIcon" mixin="static-ui" position="0.0225 0.07 0.001" spawn="entity: switch; enabled: true; mixin: dynamic-ui;"></a-circle-button>
+							<a-circle-button id="inpBtn" radius=0.015 src="#inputIcon" mixin="static-ui" position="0.0225 0.11 0.001" spawn="entity: input; placeholder: Username; color: black; width: 1; mixin: dynamic-ui"></a-circle-button>
+							<a-circle-button id="chkBtn" radius=0.015 src="#checkboxIcon" mixin="static-ui" position="0.0225 0.15 0.001" spawn="entity: radio; label: a radio button; checked: true; disabled: false; mixin: dynamic-ui"></a-circle-button>
+							<a-circle-button id="rdoBtn" radius=0.015 src="#radioIcon" mixin="static-ui" position="0.0225 0.19 0.001" spawn="entity: checkbox; width: 3; label: I am a checkbox; checked: true; mixin: dynamic-ui"></a-circle-button>
+						</a-form>
+					</a-card>
+					<!-- keypad on hand -->
+					<!-- <a-keypad id="left-keypad" is-open=true physical-keyboard=true scale="0.5 0.5 0.5" mixin="static-ui" leap-wearable="origin: palm; direction: palmNormal; translation: 0 0 0.05; lookAt: end"
+					  visible=false event-set__show="_event: handopen; visible: true" event-set__hide1="_event: handhold; visible: false"
+					  event-set__hide2="_event: handturndorsal; visible: false">
+					</a-keypad> -->
+
+					<!-- controls on hand -->
+					<a-entity id="left-cursor" mixin="hand-cursor" leap-wearable="origin: palm; direction: palmSelection; translation: 0 0 0; lookAt: origin; show: handturndorsal; hide: handturnpalmar"></a-entity>
+					<a-entity id="left-ring" mixin="hand-cursor-ring" leap-wearable="origin: palm; direction: palmSelection; translation: 0 0 0.15; lookAt: origin; show: handturndorsal; hide: handturnpalmar"></a-entity>
+				</a-entity>
+				<a-entity id="righthand" leap-hand="hand: right; wearables: [id^='right-']">
+					<a-entity id="right-cursor" mixin="hand-cursor" leap-wearable="origin: palm; direction: palmSelection; translation: 0 0 0; lookAt: origin"></a-entity>
+					<a-entity id="right-ring" mixin="hand-cursor-ring" leap-wearable="origin: palm; direction: palmSelection; translation: 0 0 0.15; lookAt: origin"></a-entity>
+					<a-entity id="right-nail" mixin="finger-tip" leap-wearable="origin: index; direction: index; translation: 0 0 0"></a-entity>
 				</a-entity>
 			</a-camera>
 		</a-entity>
 
 		<!-- Hands -->
-		<a-entity id="left" hand-controls="left"></a-entity>
-		<a-entity id="right" hand-controls="right"></a-entity>
+		<!-- <a-entity id="left" hand-controls="left"></a-entity>
+		<a-entity id="right" hand-controls="right"></a-entity> -->
+		<!-- <a-gui-flex-container flex-direction="row" justify-content="center" align-items="normal" component-padding="0.1" opacity="0.7"
+		  width="5" height="1" position="0 0.45 -4" rotation="0 0 0" scale="0.5 0.5 0.5">
+			<a-gui-icon-button width="0.75" height="0.75" onclick="togglePlayback" icon="ios-play">
+			</a-gui-icon-button>
+			<a-gui-icon-button width="0.75" height="0.75" onclick="stop" icon="stop">
+			</a-gui-icon-button>
+			<a-gui-icon-button width="0.75" height="0.75" onclick="toggleSound" icon="music-note">
+			</a-gui-icon-button>
+			<a-gui-toggle width="2.5" height="0.75" onclick="toggleCaps" value="Captions" font-family="Arial">
+			</a-gui-toggle>
+		</a-gui-flex-container>
 
-		<a-entity id="box1" mixin="cube" position="-0.5 0.3 -1" material="color: red"></a-entity>
-		<a-entity id="box2" mixin="cube" position="0.00 0.6 -1" material="color: green"></a-entity>
-		<a-entity id="box3" mixin="cube" position="0.125 0.3 -1" material="color: blue"></a-entity>
+		<a-gui-button position="-2 2.5 -4" width="2.5" height="0.75" onclick="testButtonAction" key-code="32" value="test button"
+		  font-family="Arial" margin="0 0 0.05 0" mixin="dynamic-ui">
+		</a-gui-button> -->
+		<!-- <a-checkbox id="check2" position="0.2 1.5 0" width="3" name="stuff" label="I am a checkbox" checked="true"></a-checkbox> -->
+		<!-- <a-button id="btnClickme" position="-0.5 2 -2" width=1 scale="0.5 0.5 0.5" name="stuff" value="Click Me" type="raise" mixin="dynamic-ui"></a-button> -->
+		<a-entity id="eventEditor" event-editor></a-entity>
+		<!-- <a-text-label position="-0.7 1 -2.5" value="Username" color=theme.white background-color='#4076fd' width="1" align="center"></a-text-label> -->
+		<!-- <a-icon-button width=0.2 height=0.2 position="0.1 1.9 0.001" color='#aaa' button-color='#fff' src="#eventIcon"></a-icon-button> -->
+
+		<!-- <a-card id="eventEditor" width=2 height=1 position="-1 0.5 -2" type="raised" color='#FFF'>
+			<a-form>
+				<a-icon-button width=0.2 height=0.2 position="0.15 0.9 0.001" color='#aaa' button-color='#fff' type='flat' src="#eventIcon"
+				  mixin="static-ui"></a-icon-button>
+				<a-icon-button width=0.2 height=0.2 position="0.15 0.7 0.001" color='#aaa' button-color='#fff' type='flat' src="#targetIcon"
+				  mixin="static-ui"></a-icon-button>
+				<a-input width=1.6 height=0.15 position="0.35 0.9 0.001" align='left' placeholder="Event, e.g. click." color='#263238' background-color='#bbb'
+				  placeholder-color='#aaa' type='flat' mixin="static-ui"></a-input>
+				<a-input width=1.6 height=0.15 position="0.35 0.7 0.001" align='left' placeholder="Target, e.g. self" color='#263238' background-color='#bbb'
+				  placeholder-color='#aaa' type='flat' mixin="static-ui"></a-input>
+				<a-input id="btnEventDetail" width=1.9 height=0.2 position="0.05 0.5 0.001" placeholder="Add your action here..." color='#263238'
+				  background-color='#fff' placeholder-color='#aaa' type='flat' mixin="static-ui"></a-input>
+				<a-button id="btnSaveEventDetail" position="1.45 0.15 0.001" width=1 scale="0.5 0.5 0.5" value="Save" type="raised" mixin="static-ui"></a-button>
+				<a-button id="btnClearEventDetail" position="0.9 0.15 0.001" width=1 scale="0.5 0.5 0.5" value="Clear" type="flat" color='#4076fd'
+				  button-color='#FFF' mixin="static-ui"></a-button>
+			</a-form>
+		</a-card> -->
+
+		<!-- <a-input id="inp1" position="-0.7 1.9 -2" placeholder="Username" color="black" width="1" mixin="dynamic-ui"></a-input> -->
+		<!-- <a-entity mixin="ui" position="0.5 1.9 -2" scale="0.5 0.5 0.5">
+			<a-button id="btn1" width=1 name="stuff" value="Button" type="raise" mixin="ui"></a-button>
+		</a-entity> -->
+
+
+		<!-- <a-entity id="box1" mixin="cube" position="-0.25 0.3 -1" material="color: red"></a-entity> -->
+		<a-entity id="box2" mixin="dynamic cube" position="0 3 -2.5" material="color: green"></a-entity>
+		<!-- <a-entity id="box3" mixin="cube" position="0.25 0.3 -1" material="color: blue"></a-entity> -->
+
+		<!-- <a-circlebutton id="btnBtn" position="-0.7 2 -2.5" src="#buttonIcon"></a-circlebutton> -->
+		<!-- <a-circlebutton id="tglBtn" position="0 2 -2.5" src="#toggleIcon"></a-circlebutton> -->
+		<!-- <a-circlebutton id="inpBtn" position="0 2 -2.5" src="#inputIcon"></a-circlebutton> -->
+		<!-- <a-circlebutton id="chkBtn" position="0 2 -2.5" src="#checkboxIcon"></a-circlebutton> -->
+		<!-- <a-circlebutton id="rdoBtn" position="0 2 -2.5" src="#toggleIcon"></a-circlebutton> -->
+
+
+		<!-- BEGIN FORM -->
+		<!-- <a-rounded position="1 1 -1" width="3" height="4" radius="0.05" rotation="0 -20 0" scale="0.3 0.3 0.3">
+			<a-form>
+				<a-button id="switchSpawner" position="0.2 3.7 0" width=3 name="stuff" value="Switch" type="raised" mixin="static-ui" spawn="entity: switch; enabled: true; mixin: dynamic-ui;"></a-button>
+				<a-button position="0.2 3.2 0" width=3 name="stuff" value="Input" type="raised" mixin="static-ui" spawn="entity: input; placeholder: Username; color: black; width: 1; mixin: dynamic-ui"></a-button>
+				<a-button position="0.2 2.6 0" width=3 name="stuff" value="Button" type="raised" mixin="static-ui" spawn="entity: button; value: Click me; type: raised; mixin: dynamic-ui;"></a-button>
+				<a-button position="0.2 2.1 0" width=3 name="stuff" value="Radio" type="raised" mixin="static-ui" spawn="entity: radio; label: a radio button; checked: true; disabled: false; mixin: dynamic-ui"></a-button>
+				<a-button position="0.2 1.6 0" width=3 name="stuff" value="Checkbox" type="raised" mixin="static-ui" spawn="entity: checkbox; width: 3; label: I am a checkbox; checked: true; mixin: dynamic-ui"></a-button>
+				<a-button position="0.2 1.1 0" width=3 name="stuff" value="Panel" type="raised" mixin="static-ui" spawn="entity: rounded; width: 4; height: 3; radius: 0.05; scale: 0.3 0.3 0.3; mixin: dynamic-ui"></a-button>
+			</a-form>
+		</a-rounded> -->
+		<!-- END FORM -->
+		<!-- <a-circle-button radius=0.1 src="#buttonIcon" mixin="static-ui" position="0.1 0.15 0.001"></a-circle-button> -->
+
+		<a-card id='bottom-menu' position="-1.5 -0 -2" rotation="-20 0 0" width=3 height=0.3 color='#fff'>
+			<a-form>
+				<a-circle-button radius=0.1 button-color='#263238' src="#buttonIcon" mixin="static-ui" position="0.2 0.15 0.01" spawn="entity: button; value: Click me; type: raised; mixin: dynamic-ui;"></a-circle-button>
+				<a-circle-button radius=0.1 button-color='#263238' src="#toggleIcon" mixin="static-ui" position="0.5 0.15 0.01" spawn="entity: switch; enabled: true; mixin: dynamic-ui;"></a-circle-button>
+				<a-circle-button radius=0.1 button-color='#263238' src="#inputIcon" mixin="static-ui" position="0.8 0.15 0.01" spawn="entity: input; placeholder: Username; color: black; width: 1; mixin: dynamic-ui"></a-circle-button>
+				<a-circle-button radius=0.1 button-color='#263238' src="#checkboxIcon" mixin="static-ui" position="1.1 0.15 0.01" spawn="entity: radio; label: a radio button; checked: true; disabled: false; mixin: dynamic-ui"></a-circle-button>
+				<a-circle-button radius=0.1 button-color='#263238' src="#radioIcon" mixin="static-ui" position="1.4 0.15 0.01" spawn="entity: checkbox; width: 3; label: I am a checkbox; checked: true; mixin: dynamic-ui"></a-circle-button>
+				<a-circle-button radius=0.1 button-color='#263238' src="#cardIcon" mixin="static-ui" position="1.7 0.15 0.01" spawn="entity: card; width: 4; height: 3; scale: 0.3 0.3 0.3; mixin: dynamic-ui"></a-circle-button>
+				<a-button id='btnClear' width=1 scale="0.4 0.4 0.4" value="Clear" type="flat" color="#4076fd" button-color='#fff' mixin="static-ui"
+				  position="2 0.15 0.01"></a-button>
+				<a-button id='btnSave' width=1 scale="0.4 0.4 0.4" value="Save" type="raised" mixin="static-ui" position="2.5 0.15 0.01"></a-button>
+			</a-form>
+		</a-card>
+		<a-toast message="Layout Saved!" action="Got it"></a-toast>
 
 		<!-- Ground -->
 		<a-entity geometry="primitive: plane; height: 100; width: 100" rotation="-90 0 0" material="color: black; opacity: 0" static-body
 		  collision-filter="group: default; collidesWith: cube"></a-entity>
-		<!-- <a-grid static-body></a-grid> -->
+		<!-- <a-grid static-body collision-filter="group: default; collidesWith: cube"></a-grid> -->
 
 		<!-- Lighting -->
-		<!-- <a-light type="ambient" color="#ccc"></a-light>
-		<a-light color="#ddf" distance="100" intensity="0.4" type="point"></a-light>
-		<a-light color="#ddf" position="3 10 -10" distance="50" intensity="0.4" type="point"></a-light> -->
+		<a-light type="ambient" color="#ccc"></a-light>
+		<!-- <a-entity light="type:directional; castShadow:true; color: #EEE; intensity: 0.5" position="1 1 1 "></a-entity> -->
+
+		<!-- Layout -->
+		<a-entity id="layout"></a-entity>
 	</a-scene>
 	<script>
 		var box1 = document.querySelector('#box1');
 		var box2 = document.querySelector('#box2');
 		var box3 = document.querySelector('#box3');
-		var rightHand = document.querySelector("#right-hand");
-		var leftHand = document.querySelector("#left-hand");
-		var palmBox = document.querySelector('#palm-box');
-		var palmRing = document.querySelector('#palm-ring');
-		var palmRaycaster = document.querySelector('#palm-cursor');
+		var rightHand = document.querySelector("#right-hand ");
+		var leftHand = document.querySelector("#left-hand ");
+		var leftBox = document.querySelector('#left-box');
+		var rightRing = document.querySelector('#right-ring');
+		var rightCursor = document.querySelector('#right-cursor');
+		var inp = document.querySelector('#inp1');
+		var btn = document.querySelector('#btn1');
+		var keyboard = document.querySelector('#keyboard');
+		var btnSave = document.querySelector('#btnSave');
+		var btnClear = document.querySelector('#btnClear');
+		var toast = document.querySelector('a-toast');
 
-
-		function checkClickEvent(e) {
-			if (e instanceof MouseEvent) {
-				const data = e.fromElement.components['super-hands'].data;
-				if (data.grabStartButtons[0] == data.grabEndButtons[0]) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
+		if (btnSave) {
+			btnSave.addEventListener('click', AFRAME.utils.debounce(saveLayout, 250));
+			btnSave.addEventListener('click', function () {
+				toast.show();
+			});
 		}
 
-		palmBox.addEventListener('click', (e) => {
-			if (checkClickEvent(e)) {
-				palmBox.setAttribute('material', 'color', getRandomColor());
-			}
-		});
+		if (btnClear) {
+			btnClear.addEventListener('click', AFRAME.utils.debounce(clearLayout, 250));
+		}
 
-		box1.addEventListener('click', (e) => {
-			if (checkClickEvent(e)) {
-				box1.setAttribute('material', 'color', getRandomColor());
-			}
-		});
 
-		box2.addEventListener('click', (e) => {
-			if (checkClickEvent(e)) {
-				box2.setAttribute('material', 'color', getRandomColor());
-			}
-		});
 
-		box3.addEventListener('click', (e) => {
-			if (checkClickEvent(e)) {
-				box3.setAttribute('material', 'color', getRandomColor());
-			}
-		});
+		// keyboard.addEventListener('click', (e) => {
+		// 	console.log(e);
+		// });
+
+		// leftBox.addEventListener('click', (e) => {
+		// 	if (checkClickEvent(e)) {
+		// 		leftBox.setAttribute('material', 'color', getRandomColor());
+		// 	}
+		// });
+
+		// box1.addEventListener('click', (e) => {
+		// 	if (checkClickEvent(e)) {
+		// 		box1.setAttribute('material', 'color', getRandomColor());
+		// 	}
+		// });
+
+		// box2.addEventListener('click', (e) => {
+		// 	if (true) {
+		// 		box2.setAttribute('material', 'color', getRandomColor());
+		// 	}
+		// });
+
+		// btn.addEventListener('dbclick', function () {
+		// 	console.log("double clicked");
+		// });
+
+		// box3.addEventListener('click', (e) => {
+		// 	if (checkClickEvent(e)) {
+		// 		box3.setAttribute('material', 'color', getRandomColor());
+		// 	}
+		// });
 
 		// box1.addEventListener('click', (e) => {
 		// 	// if (checkClickEvent(e)) {
@@ -153,6 +314,12 @@
 		// rightHand.addEventListener('grab-start', (e) => {
 		// 	console.log(e);
 		// });
+
+		// var newscript = document.createElement('script');
+		// newscript.type = 'text/javascript';
+		// newscript.async = true;
+		// newscript.text = 'alert(\'hello\')';
+		// document.getElementsByTagName('body')[0].appendChild(newscript);
 	</script>
 </body>
 

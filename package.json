@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "run": "yarn dist",
-    "dist": "NODE_ENV=production parcel build browser.js --no-minify -d ./dist -o aframe-leap-hands.js",
-    "dist-min": "NODE_ENV=productio parcel build browser.js -d ./dist -o aframe-leap-hands.min.js",
+    "dist:max": "NODE_ENV=production parcel build browser.js --no-minify -d ./dist -o aframe-leap-hands.js",
+    "dist:min": "NODE_ENV=productio parcel build browser.js -d ./dist -o aframe-leap-hands.min.js",
+    "dist": "yarn dist:max && yarn dist:min",
     "version": "npm run dist && git add -A dist",
     "postversion": "git push && git push --tags && npm publish"
   },
